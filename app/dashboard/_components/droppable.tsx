@@ -21,7 +21,7 @@ export function Droppable({
     <div
       ref={setNodeRef}
       className={cn(
-        "h-96 border-2",
+        "h-[90dvh] border-2",
         isOver ? "bg-muted" : undefined,
         className,
       )}
