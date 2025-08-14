@@ -35,11 +35,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="fixed top-2 left-4">
-            <ModeToggle />
-          </div>
+          <div className="px-4">
+            <div className="fixed top-2 left-4">
+              <ModeToggle />
+            </div>
 
-          {children}
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

@@ -59,7 +59,9 @@ export function SignInForm() {
               </div>
               <span className="sr-only">Kanban Board</span>
             </a>
-            <h1 className="text-xl font-bold">Welcome to Kanban Board.</h1>
+            <h1 className="text-foreground text-xl font-bold">
+              Welcome to Kanban Board.
+            </h1>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link href="/sign-up" className="underline underline-offset-4">
