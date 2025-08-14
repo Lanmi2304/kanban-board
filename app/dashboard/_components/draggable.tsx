@@ -23,7 +23,7 @@ export function Draggable({
     : undefined;
 
   return (
-    <button
+    <div
       ref={setNodeRef}
       className={cn("size-fit bg-red-400", className)}
       style={style}
@@ -31,6 +31,6 @@ export function Draggable({
       {...attributes}
     >
       {children}
-    </button>
+    </div>
   );
 }

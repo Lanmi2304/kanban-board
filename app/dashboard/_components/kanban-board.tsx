@@ -4,14 +4,17 @@ import { DndContext, UniqueIdentifier, DragEndEvent } from "@dnd-kit/core";
 import { Droppable } from "./droppable";
 import { Draggable } from "./draggable";
 import { cn } from "@/lib/utils/cn";
-import { Ellipsis } from "lucide-react";
+import { Calendar, Clock, Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type TaskType = {
   id: string;
   title: string;
-  content: string;
+  priority?: "low" | "medium" | "high";
+  content: string; // Extend this later
   cardId: UniqueIdentifier;
+  createdAt: string;
+  dueDate: string;
 };
 
 type CardType = {
@@ -29,21 +32,40 @@ const DEFAULT_CARDS: CardType[] = [
 
 // Get from the db
 const TASKS: TaskType[] = [
-  { id: "task-1", title: "Task 1", content: "This is task 1", cardId: "ready" },
+  {
+    id: "task-1",
+    title: "Do the homework",
+    content:
+      "lorem ipsum dolor sit amet, consectetur adipiscing elit.lorem ipsum dolor sit amet, consectetur adipiscing elit.lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    cardId: "ready",
+    createdAt: new Date().toLocaleDateString(),
+    dueDate: new Date().toLocaleDateString(),
+  },
   {
     id: "task-2",
-    title: "Task 2",
+    title: "Wash the car",
+    priority: "high",
     content: "This is task 2",
     cardId: "in-progress",
+    createdAt: new Date().toLocaleDateString(),
+    dueDate: new Date().toLocaleDateString(),
   },
   {
     id: "task-3",
-    title: "Task 3",
+    title: "Buy groceries",
     content: "This is task 3",
     cardId: "in-review",
+    createdAt: new Date().toLocaleDateString(),
+    dueDate: new Date().toLocaleDateString(),
   },
-  { id: "task-4", title: "Task 4", content: "This is task 4", cardId: "done" },
-  { id: "task-5", title: "Task 5", content: "This is task 5", cardId: "ready" },
+  {
+    id: "task-4",
+    title: "Clean the house",
+    content: "This is task 4",
+    cardId: "done",
+    createdAt: new Date().toLocaleDateString(),
+    dueDate: new Date().toLocaleDateString(),
+  },
 ];
 
 export function KanbanBoard() {
@@ -87,7 +109,6 @@ export function KanbanBoard() {
       content: "This is a new card",
     };
     setState({ ...state, cards: [...state.cards, newCard] });
-    console.log("ok");
   }
 
   return (
@@ -124,15 +145,40 @@ export function KanbanBoard() {
                   <Draggable
                     key={task.id}
                     id={task.id}
-                    className="w-full cursor-pointer focus:cursor-grab"
+                    className={cn(
+                      "bg-muted/60 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
+                      {
+                        "border-blue-500": card.id === "ready",
+                        "border-amber-500": card.id === "in-progress",
+                        "border-purple-500": card.id === "in-review",
+                        "border-green-500": card.id === "done",
+                      },
+                    )}
                   >
-                    {task.title}
+                    <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                      {/* <Link href="https://www.facebook.com">Facebook</Link> */}
+                      {task.content}
+                    </p>
+                    <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
+                      <div>
+                        <span className="truncate">{task.title} </span>
+                        {task.priority === "high" && (
+                          <span className="animate-jumping inline-block font-bold text-red-600">
+                            !
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                        <Calendar className="size-4" /> {task.dueDate}
+                      </span>
+                    </div>
                   </Draggable>
                 ))}
               </div>
             </Droppable>
           ))}
         </DndContext>
+
         <Button onClick={handleAddNewCard}> + Add Card</Button>
       </div>
     </div>
