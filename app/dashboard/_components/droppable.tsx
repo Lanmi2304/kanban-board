@@ -16,15 +16,15 @@ export function Droppable({
   const { isOver, setNodeRef } = useDroppable({
     id,
   });
-  const style = {
-    color: isOver ? "green" : undefined,
-  };
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
-      className={cn("h-96 border-2", className)}
+      className={cn(
+        "h-96 border-2",
+        isOver ? "bg-muted" : undefined,
+        className,
+      )}
     >
       {children}
     </div>

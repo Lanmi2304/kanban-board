@@ -1,15 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import {
-  DndContext,
-  UniqueIdentifier,
-  DragEndEvent,
-  DragStartEvent,
-} from "@dnd-kit/core";
+import { DndContext, UniqueIdentifier, DragEndEvent } from "@dnd-kit/core";
 import { Droppable } from "./droppable";
 import { Draggable } from "./draggable";
 import { cn } from "@/lib/utils/cn";
-import { Dot, Ellipsis, Settings } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 
 type TaskType = {
   id: string;
@@ -51,30 +46,34 @@ const TASKS: TaskType[] = [
 ];
 
 export function KanbanBoard() {
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [state, setState] = useState<TaskType[]>(() => TASKS);
 
+  const tasksByCard = React.useMemo(() => {
+    return state.reduce<Record<string, TaskType[]>>((acc, task) => {
+      const cardId = task.cardId as string;
+      if (!acc[cardId]) {
+        acc[cardId] = [];
+      }
+      acc[cardId].push(task);
+      return acc;
+    }, {});
+  }, [state]);
+
   function handleDragEnd(event: DragEndEvent) {
-    const { over } = event;
-    if (!over) {
-      setActiveId(null);
-      return;
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const taskId = active.id as string;
+      const updatedState = state.map((task) =>
+        task.id === taskId ? { ...task, cardId: over.id } : task,
+      );
+      setState(updatedState);
     }
-
-    const taskId = activeId as string;
-    const updatedState = state.map((task) =>
-      task.id === taskId ? { ...task, cardId: over.id } : task,
-    );
-    setState(updatedState);
-  }
-
-  function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id);
   }
 
   return (
     <div className="flex w-full flex-row justify-center gap-4">
-      <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+      <DndContext onDragEnd={handleDragEnd}>
         {CARDS.map((card) => (
           <Droppable
             key={card.id}
@@ -84,13 +83,12 @@ export function KanbanBoard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div
-                  className={cn(
-                    "size-4 rounded-full ring-2",
-                    card.id === "ready" ? "ring-blue-500" : null,
-                    card.id === "in-progress" ? "ring-amber-500" : null,
-                    card.id === "in-review" ? "ring-purple-500" : null,
-                    card.id === "done" ? "ring-green-500" : null,
-                  )}
+                  className={cn("size-4 rounded-full ring-2", {
+                    "ring-blue-500": card.id === "ready",
+                    "ring-amber-500": card.id === "in-progress",
+                    "ring-purple-500": card.id === "in-review",
+                    "ring-green-500": card.id === "done",
+                  })}
                 ></div>
                 <h1 className="font-semibold">{card.title}</h1>
               </div>
@@ -99,17 +97,15 @@ export function KanbanBoard() {
 
             <p className="text-muted-foreground text-sm">{card.content}</p>
             <div className="mt-2 flex flex-col gap-2">
-              {state
-                .filter((task) => task.cardId === card.id)
-                .map((task) => (
-                  <Draggable
-                    key={task.id}
-                    id={task.id}
-                    className="cursor-pointer focus:cursor-grab"
-                  >
-                    {task.title}
-                  </Draggable>
-                ))}
+              {(tasksByCard[card.id] || []).map((task) => (
+                <Draggable
+                  key={task.id}
+                  id={task.id}
+                  className="cursor-pointer focus:cursor-grab"
+                >
+                  {task.title}
+                </Draggable>
+              ))}
             </div>
           </Droppable>
         ))}
