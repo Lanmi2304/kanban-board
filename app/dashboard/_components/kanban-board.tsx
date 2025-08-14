@@ -92,7 +92,7 @@ export function KanbanBoard() {
 
   return (
     <div className="flex w-fit flex-row items-start">
-      <div className="flex w-full flex-row justify-center gap-4">
+      <div className="flex w-full flex-row justify-center gap-4 overflow-hidden">
         <DndContext onDragEnd={handleDragEnd}>
           {state.cards.map((card) => (
             <Droppable
