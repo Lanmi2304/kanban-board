@@ -119,7 +119,7 @@ export function KanbanBoard() {
             <Droppable
               key={card.id}
               id={card.id}
-              className="min-w-80 rounded-lg border p-4"
+              className="w-full min-w-80 rounded-lg border p-4"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
