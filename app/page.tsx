@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="relative my-10 flex w-full flex-col-reverse items-center justify-start md:mt-0 md:flex-row md:justify-center">
-      <div className="flex w-full flex-col gap-4 text-center font-medium md:w-1/3 md:text-left">
+      <div className="relative -top-10 flex w-full flex-col gap-4 text-center font-medium md:top-0 md:w-1/3 md:text-left">
         <h1 className="text-primary text-5xl font-bold lg:text-7xl">
           {/* Kanban title project */}
           Welcome to Kanban Board
