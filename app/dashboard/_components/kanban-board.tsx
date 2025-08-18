@@ -1,6 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { DndContext, UniqueIdentifier, DragEndEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  UniqueIdentifier,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
 import { Droppable } from "./droppable";
 import { Draggable } from "./draggable";
 import { cn } from "@/lib/utils/cn";
@@ -11,7 +17,7 @@ type TaskType = {
   id: string;
   title: string;
   priority?: "low" | "medium" | "high";
-  content: string; // Extend this later
+  content: string;
   cardId: UniqueIdentifier;
   createdAt: string;
   dueDate: string;
@@ -30,13 +36,11 @@ const DEFAULT_CARDS: CardType[] = [
   { id: "done", title: "Done", content: "This is done" },
 ];
 
-// Get from the db
 const TASKS: TaskType[] = [
   {
     id: "task-1",
     title: "Do the homework",
-    content:
-      "lorem ipsum dolor sit amet, consectetur adipiscing elit.lorem ipsum dolor sit amet, consectetur adipiscing elit.lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    content: "This is task 1",
     cardId: "ready",
     createdAt: new Date().toLocaleDateString(),
     dueDate: new Date().toLocaleDateString(),
@@ -66,17 +70,25 @@ const TASKS: TaskType[] = [
     createdAt: new Date().toLocaleDateString(),
     dueDate: new Date().toLocaleDateString(),
   },
+  {
+    id: "task-5",
+    title: "Clean the room",
+    content: "This is task 5",
+    cardId: "done",
+    createdAt: new Date().toLocaleDateString(),
+    dueDate: new Date().toLocaleDateString(),
+  },
 ];
 
 export function KanbanBoard() {
   const [state, setState] = useState<{ tasks: TaskType[]; cards: CardType[] }>(
-    () => {
-      return {
-        tasks: TASKS,
-        cards: DEFAULT_CARDS,
-      };
-    },
+    () => ({
+      tasks: TASKS,
+      cards: DEFAULT_CARDS,
+    }),
   );
+
+  const [activeTask, setActiveTask] = useState<TaskType | null>(null);
 
   const tasksByCard = React.useMemo(() => {
     return state.tasks.reduce<Record<string, TaskType[]>>((acc, task) => {
@@ -89,9 +101,14 @@ export function KanbanBoard() {
     }, {});
   }, [state]);
 
+  function handleDragStart(event: DragStartEvent) {
+    const taskId = event.active.id as string;
+    const task = state.tasks.find((t) => t.id === taskId);
+    if (task) setActiveTask(task);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
       const taskId = active.id as string;
       const updatedState = state.tasks.map((task) =>
@@ -99,9 +116,9 @@ export function KanbanBoard() {
       );
       setState({ ...state, tasks: updatedState });
     }
+    setActiveTask(null);
   }
 
-  // Add a form to create new cards
   function handleAddNewCard() {
     const newCard: CardType = {
       id: `card-${state.cards.length + 1}`,
@@ -114,44 +131,45 @@ export function KanbanBoard() {
   return (
     <div className="flex w-full flex-col gap-4">
       <Button onClick={handleAddNewCard} className="w-fit">
-        {" "}
         + Add Card
       </Button>
 
       <div className="flex w-full flex-col justify-start gap-4 overflow-x-scroll md:flex-row">
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           {state.cards.map((card) => (
             <Droppable
               key={card.id}
               id={card.id}
-              className="h-90 w-full min-w-80 shrink-0 rounded-lg border p-4 md:shrink"
+              className="flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-visible rounded-lg border p-4 md:shrink"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={cn("size-4 rounded-full ring-2", {
-                      "ring-blue-500": card.id === "ready",
-                      "ring-amber-500": card.id === "in-progress",
-                      "ring-purple-500": card.id === "in-review",
-                      "ring-green-500": card.id === "done",
-                    })}
-                  ></div>
-                  <h1 className="font-semibold">{card.title}</h1>
+              <div className="h-1/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={cn("size-4 rounded-full ring-2", {
+                        "ring-blue-500": card.id === "ready",
+                        "ring-amber-500": card.id === "in-progress",
+                        "ring-purple-500": card.id === "in-review",
+                        "ring-green-500": card.id === "done",
+                      })}
+                    ></div>
+                    <h1 className="font-semibold">{card.title}</h1>
+                  </div>
+                  <Ellipsis className="text-primary" />
                 </div>
-                <Ellipsis className="text-primary" />
+                <p className="text-muted-foreground text-sm">{card.content}</p>
+                <Button className="mt-2 w-full" variant="outline">
+                  + Add Task
+                </Button>
               </div>
 
-              <p className="text-muted-foreground text-sm">{card.content}</p>
-              <Button className="mt-2 w-full cursor-pointer" variant="outline">
-                + Add Task
-              </Button>
-              <div className="mt-2 flex flex-col gap-2">
+              <div className="mt-2 flex h-4/5 w-full flex-col gap-2 overflow-y-scroll">
                 {(tasksByCard[card.id] || []).map((task) => (
                   <Draggable
                     key={task.id}
                     id={task.id}
                     className={cn(
-                      "bg-muted/60 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
+                      "bg-muted/60 relative z-50 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
                       {
                         "border-blue-500": card.id === "ready",
                         "border-amber-500": card.id === "in-progress",
@@ -161,7 +179,6 @@ export function KanbanBoard() {
                     )}
                   >
                     <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                      {/* <Link href="https://www.facebook.com">Facebook</Link> */}
                       {task.content}
                     </p>
                     <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
@@ -182,6 +199,17 @@ export function KanbanBoard() {
               </div>
             </Droppable>
           ))}
+
+          <DragOverlay>
+            {activeTask ? (
+              <div className="bg-muted/90 rounded-lg border p-3 shadow-lg">
+                <p className="text-foreground/80 text-sm">
+                  {activeTask.content}
+                </p>
+                <div className="mt-2 font-semibold">{activeTask.title}</div>
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       </div>
     </div>
