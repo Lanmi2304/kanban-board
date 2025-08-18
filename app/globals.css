@@ -3,6 +3,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none; /* IE i Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 @keyframes jump {
   from 0% {
     transform: translateY(0);
