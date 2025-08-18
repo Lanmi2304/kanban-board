@@ -112,19 +112,19 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <Button onClick={handleAddNewCard} className="w-fit">
         {" "}
         + Add Card
       </Button>
 
-      <div className="flex w-full flex-row justify-start gap-4 overflow-x-scroll">
+      <div className="flex w-full flex-col justify-start gap-4 overflow-x-scroll md:flex-row">
         <DndContext onDragEnd={handleDragEnd}>
           {state.cards.map((card) => (
             <Droppable
               key={card.id}
               id={card.id}
-              className="w-full min-w-80 shrink-0 rounded-lg border p-4 md:shrink"
+              className="h-90 w-full min-w-80 shrink-0 rounded-lg border p-4 md:shrink"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
