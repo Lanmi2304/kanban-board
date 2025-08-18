@@ -4,7 +4,7 @@ import { DndContext, UniqueIdentifier, DragEndEvent } from "@dnd-kit/core";
 import { Droppable } from "./droppable";
 import { Draggable } from "./draggable";
 import { cn } from "@/lib/utils/cn";
-import { Calendar, Clock, Ellipsis } from "lucide-react";
+import { Calendar, Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type TaskType = {
@@ -112,14 +112,14 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="flex w-fit flex-row items-start">
-      <div className="flex w-full flex-row justify-center gap-4 overflow-hidden">
+    <div className="flex w-full flex-row items-start">
+      <div className="flex w-full flex-row justify-start gap-4 overflow-x-scroll">
         <DndContext onDragEnd={handleDragEnd}>
           {state.cards.map((card) => (
             <Droppable
               key={card.id}
               id={card.id}
-              className="w-full min-w-80 rounded-lg border p-4"
+              className="w-full min-w-80 shrink-0 rounded-lg border p-4 md:shrink"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

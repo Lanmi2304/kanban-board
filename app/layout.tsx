@@ -36,7 +36,7 @@ export default function RootLayout({
               className="object-cover"
             />
           </div>
-          <div className="px-4">
+          <div className="w-full px-4">
             <div className="fixed top-2 right-4 z-20">
               <ModeToggle />
             </div>
