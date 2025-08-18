@@ -28,14 +28,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="fixed -top-10 h-30 w-full md:top-0 lg:h-20">
+          {/* <div className="fixed -top-10 h-30 w-full md:top-0 lg:h-20">
             <Image
               src={wave}
               alt="Kanban Method"
               fill
               className="object-cover"
             />
-          </div>
+          </div> */}
           <div className="w-full px-4">
             <div className="fixed top-2 right-4 z-20">
               <ModeToggle />

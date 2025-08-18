@@ -12,15 +12,11 @@ import {
   FormMessage,
 } from "../../../components/ui/form";
 import { signInSchema, SignInSchemaInput } from "../_schemas/sign-in.schema";
-import Link from "next/link";
 import { useTransition } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import Image from "next/image";
-import LoginImage from "@/public/login.svg";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -53,7 +49,7 @@ export function SignInForm() {
   }
 
   return (
-    <Card className="mt-0 w-full max-w-sm md:mt-20">
+    <Card className="w-full max-w-sm">
       <CardHeader>
         <div className="my-4 flex w-full flex-col items-center justify-center gap-2">
           <SquareKanban size={40} className="text-primary" />
@@ -63,19 +59,14 @@ export function SignInForm() {
         <CardDescription>
           Enter your email below to login to your account
         </CardDescription>
-        {/* <CardAction>
-          <Button variant="link" asChild>
-            <Link href="/sign-up">Sign Up</Link>
-          </Button>
-        </CardAction> */}
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="relative w-full max-w-sm space-y-6"
+            className="relative w-full max-w-sm space-y-3.5"
           >
-            <div className="relative z-20 flex flex-col gap-6">
+            <div className="relative z-20 flex flex-col gap-3.5">
               <FormField
                 control={form.control}
                 name="email"

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="relative mt-10 flex w-full flex-col-reverse items-center justify-start md:mt-0 md:flex-row md:justify-center">
+    <div className="relative my-10 flex w-full flex-col-reverse items-center justify-start md:mt-0 md:flex-row md:justify-center">
       <div className="flex w-full flex-col gap-4 text-center font-medium md:w-1/3 md:text-left">
         <h1 className="text-primary text-5xl font-bold lg:text-7xl">
           {/* Kanban title project */}
@@ -13,10 +13,8 @@ export default function Home() {
         </h1>
 
         <p className="text-muted-foreground mt-1 text-sm leading-relaxed text-balance">
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Minima
-          repellendus veniam perferendis nihil, fugit esse et ipsum repellat ut
-          autem aliquam natus deleniti aliquid fuga, nobis provident, alias
-          nulla assumenda?
+          Manage your tasks efficiently with our Kanban Board. Create, organize,
+          and track your projects seamlessly.
         </p>
         <div className="flex w-full items-center justify-center gap-4 md:justify-start">
           <Button className="cursor-pointer" size="lg" asChild>
