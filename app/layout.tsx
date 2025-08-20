@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import wave from "@/public/wave-hero.svg";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/switch-theme";
 import { Inter } from "next/font/google";
-import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -37,7 +35,7 @@ export default function RootLayout({
             />
           </div> */}
           <div className="w-full px-4">
-            <div className="fixed top-2 right-4 z-20">
+            <div className="fixed top-2 right-5 z-30">
               <ModeToggle />
             </div>
 

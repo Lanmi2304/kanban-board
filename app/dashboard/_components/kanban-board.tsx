@@ -10,7 +10,7 @@ import {
 import { Droppable } from "./droppable";
 import { Draggable } from "./draggable";
 import { cn } from "@/lib/utils/cn";
-import { Calendar, Ellipsis } from "lucide-react";
+import { Calendar, Ellipsis, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type TaskType = {
@@ -130,6 +130,13 @@ export function KanbanBoard() {
 
   return (
     <div className="flex w-full flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Project title</h1>
+        <Button className="w-fit cursor-pointer" variant="outline">
+          <Settings />
+        </Button>
+      </div>
+
       <Button onClick={handleAddNewCard} className="w-fit">
         + Add Card
       </Button>

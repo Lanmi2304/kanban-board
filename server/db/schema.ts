@@ -60,6 +60,22 @@ export const verification = pgTable("verification", {
   ),
 });
 
+export const projects = pgTable("projects", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
 export const tasks = pgTable("tasks", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
@@ -74,4 +90,7 @@ export const tasks = pgTable("tasks", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
 });

@@ -17,7 +17,8 @@ const data = {
   user: {
     name: "Milan",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar:
+      "https://lh3.googleusercontent.com/a/ACg8ocKKtr8ET0d4ibeTyw8bzsrjyRhYkx3Sc78TiZZFpxED8w93sLkSsA=s192-c-mo",
   },
 };
 
