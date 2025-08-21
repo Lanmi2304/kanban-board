@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { KanbanBoard } from "./_components/kanban-board";
+import { CreateProjectDialog } from "./_components/create-project-dialog";
 
 const projects = [];
 export default function Dashboard() {
@@ -13,9 +13,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground">
             Please create a project to get started.
           </p>
-          <Button variant="outline" className="cursor-pointer">
-            + Create Project
-          </Button>
+          <CreateProjectDialog />
         </div>
       )}
     </div>
