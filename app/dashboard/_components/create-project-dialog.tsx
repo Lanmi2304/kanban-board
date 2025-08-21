@@ -28,7 +28,8 @@ import {
 } from "../_schemas/create-project.schema";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
-import { ChangeEvent, KeyboardEvent, useRef } from "react";
+import { ChangeEvent, KeyboardEvent, useRef, useTransition } from "react";
+import { createNewProjectAction } from "./_actions/create-project.action";
 
 export function CreateProjectDialog() {
   const form = useForm<CreateProjectSchemaInput>({
@@ -38,14 +39,21 @@ export function CreateProjectDialog() {
       description: "",
     },
   });
+  const [isPending, startTransition] = useTransition();
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const { ref } = form.register("description");
 
   // 2. Define a submit handler.
-  function onSubmit(values: CreateProjectSchemaInput) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: CreateProjectSchemaInput) {
+    startTransition(async () => {
+      console.log("oks");
+      try {
+        const data = await createNewProjectAction(values);
+        console.log(data);
+      } catch (error) {
+        console.error("Error creating project:", error);
+      }
+    });
   }
 
   const adjustTextareaHeight = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -64,14 +72,15 @@ export function CreateProjectDialog() {
 
   return (
     <Dialog>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="cursor-pointer">
-              + Create Project
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+      <DialogTrigger asChild>
+        <Button variant="outline" className="cursor-pointer">
+          + Create Project
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[425px]">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <DialogHeader>
               <DialogTitle>Create Project</DialogTitle>
               <DialogDescription>
@@ -80,6 +89,7 @@ export function CreateProjectDialog() {
             </DialogHeader>
 
             <div className="grid gap-6">
+              {/* Title */}
               <FormField
                 control={form.control}
                 name="title"
@@ -90,14 +100,14 @@ export function CreateProjectDialog() {
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      The title of your project. It should be unique and
-                      descriptive.
+                      Provide a brief title for the project.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Description */}
               <FormField
                 control={form.control}
                 name="description"
@@ -109,7 +119,7 @@ export function CreateProjectDialog() {
                         rows={5}
                         placeholder="Enter project description"
                         className="peer max-h-40 resize-none bg-transparent"
-                        onKeyDown={(event) => preventBreakRow(event)}
+                        onKeyDown={preventBreakRow}
                         onInput={adjustTextareaHeight}
                         {...field}
                         ref={(element) => {
@@ -119,27 +129,28 @@ export function CreateProjectDialog() {
                       />
                     </FormControl>
                     <FormDescription>
-                      A brief description of your project.
+                      Provide a detailed brief of the project.
                     </FormDescription>
+
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="mt-4">
               <DialogClose asChild>
                 <Button variant="outline" className="cursor-pointer">
                   Cancel
                 </Button>
               </DialogClose>
               <Button type="submit" className="cursor-pointer">
-                Create Project
+                {isPending ? "Creating..." : "Create Project"}
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }
