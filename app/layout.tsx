@@ -5,6 +5,7 @@ import { ModeToggle } from "@/components/switch-theme";
 import { Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { getSession } from "@/lib/utils/get-session";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -44,6 +45,7 @@ export default async function RootLayout({
 
             <NuqsAdapter>{children}</NuqsAdapter>
           </div>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

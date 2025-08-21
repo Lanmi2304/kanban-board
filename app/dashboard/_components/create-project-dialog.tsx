@@ -28,8 +28,15 @@ import {
 } from "../_schemas/create-project.schema";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
-import { ChangeEvent, KeyboardEvent, useRef, useTransition } from "react";
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { createNewProjectAction } from "./_actions/create-project.action";
+import { toast } from "sonner";
 
 export function CreateProjectDialog() {
   const form = useForm<CreateProjectSchemaInput>({
@@ -39,19 +46,22 @@ export function CreateProjectDialog() {
       description: "",
     },
   });
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const { ref } = form.register("description");
 
-  // 2. Define a submit handler.
   async function onSubmit(values: CreateProjectSchemaInput) {
     startTransition(async () => {
-      console.log("oks");
       try {
-        const data = await createNewProjectAction(values);
-        console.log(data);
+        const { data } = await createNewProjectAction(values);
+
+        if (data?.success) toast.success("Project created successfully!");
+        form.reset();
+        setOpen(false);
       } catch (error) {
         console.error("Error creating project:", error);
+        toast.error("Failed to create project.");
       }
     });
   }
@@ -71,7 +81,7 @@ export function CreateProjectDialog() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="cursor-pointer">
           + Create Project
@@ -144,7 +154,11 @@ export function CreateProjectDialog() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" className="cursor-pointer">
+              <Button
+                type="submit"
+                className="cursor-pointer"
+                disabled={isPending}
+              >
                 {isPending ? "Creating..." : "Create Project"}
               </Button>
             </DialogFooter>
