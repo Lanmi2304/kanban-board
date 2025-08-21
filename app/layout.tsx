@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/switch-theme";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -39,7 +40,7 @@ export default function RootLayout({
               <ModeToggle />
             </div>
 
-            {children}
+            <NuqsAdapter>{children}</NuqsAdapter>
           </div>
         </ThemeProvider>
       </body>

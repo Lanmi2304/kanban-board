@@ -83,7 +83,8 @@ const TASKS: TaskType[] = [
 export function KanbanBoard() {
   const [state, setState] = useState<{ tasks: TaskType[]; cards: CardType[] }>(
     () => ({
-      tasks: TASKS,
+      // tasks: TASKS,
+      tasks: [],
       cards: DEFAULT_CARDS,
     }),
   );

@@ -20,38 +20,43 @@ import {
 import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { Search } from "lucide-react";
 
-type Status = {
+type Projects = {
   value: string;
   label: string;
 };
 
-const statuses: Status[] = [
-  {
-    value: "backlog",
-    label: "Backlog",
-  },
-  {
-    value: "todo",
-    label: "Todo",
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-  },
-  {
-    value: "done",
-    label: "Done",
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-  },
-];
+type Props = {
+  title: string;
+  projects?: Projects[];
+};
 
-export function ComboBoxResponsive({ title }: { title: string }) {
+// const projects: Projects[] = [
+//   {
+//     value: "project-1",
+//     label: "Project 1",
+//   },
+//   {
+//     value: "project-2",
+//     label: "Project 2",
+//   },
+//   {
+//     value: "project-3",
+//     label: "Project 3",
+//   },
+//   {
+//     value: "project-4",
+//     label: "Project 4",
+//   },
+//   {
+//     value: "project-5",
+//     label: "Project 5",
+//   },
+// ];
+
+export function ComboBoxResponsive({ title, projects }: Props) {
   const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
-  const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(
+  const [selectedStatus, setSelectedStatus] = React.useState<Projects | null>(
     null,
   );
 
@@ -74,7 +79,11 @@ export function ComboBoxResponsive({ title }: { title: string }) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0" align="start">
-          <StatusList setOpen={setOpen} setSelectedStatus={setSelectedStatus} />
+          <StatusList
+            setOpen={setOpen}
+            setSelectedStatus={setSelectedStatus}
+            projects={projects}
+          />
         </PopoverContent>
       </Popover>
     );
@@ -89,7 +98,11 @@ export function ComboBoxResponsive({ title }: { title: string }) {
       </DrawerTrigger>
       <DrawerContent>
         <div className="mt-4 border-t">
-          <StatusList setOpen={setOpen} setSelectedStatus={setSelectedStatus} />
+          <StatusList
+            setOpen={setOpen}
+            setSelectedStatus={setSelectedStatus}
+            projects={projects}
+          />
         </div>
       </DrawerContent>
     </Drawer>
@@ -99,30 +112,33 @@ export function ComboBoxResponsive({ title }: { title: string }) {
 function StatusList({
   setOpen,
   setSelectedStatus,
+  projects,
 }: {
   setOpen: (open: boolean) => void;
-  setSelectedStatus: (status: Status | null) => void;
+  setSelectedStatus: (status: Projects | null) => void;
+  projects?: Projects[];
 }) {
   return (
     <Command>
       <CommandInput placeholder="Filter projects..." />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>No projects found.</CommandEmpty>
         <CommandGroup>
-          {statuses.map((status) => (
-            <CommandItem
-              key={status.value}
-              value={status.value}
-              onSelect={(value) => {
-                setSelectedStatus(
-                  statuses.find((priority) => priority.value === value) || null,
-                );
-                setOpen(false);
-              }}
-            >
-              {status.label}
-            </CommandItem>
-          ))}
+          {projects &&
+            projects.map((project) => (
+              <CommandItem
+                key={project.value}
+                value={project.value}
+                onSelect={(value) => {
+                  setSelectedStatus(
+                    projects.find((project) => project.value === value) || null,
+                  );
+                  setOpen(false);
+                }}
+              >
+                {project.label}
+              </CommandItem>
+            ))}
         </CommandGroup>
       </CommandList>
     </Command>
