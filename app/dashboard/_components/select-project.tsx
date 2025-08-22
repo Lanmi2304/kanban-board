@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { Search } from "lucide-react";
-
-type Projects = {
-  value: string;
-  label: string;
-};
+import { Projects } from "@/server/db/schema";
 
 type Props = {
   title: string;
@@ -69,7 +65,7 @@ export function ComboBoxResponsive({ title, projects }: Props) {
             className="w-[150px] cursor-pointer justify-start"
           >
             {selectedStatus ? (
-              <>{selectedStatus.label}</>
+              <>{selectedStatus.title}</>
             ) : (
               <>
                 <Search />
@@ -93,7 +89,7 @@ export function ComboBoxResponsive({ title, projects }: Props) {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" className="w-[150px] justify-start">
-          {selectedStatus ? <>{selectedStatus.label}</> : <>{title}</>}
+          {selectedStatus ? <>{selectedStatus.title}</> : <>{title}</>}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
@@ -127,16 +123,16 @@ function StatusList({
           {projects &&
             projects.map((project) => (
               <CommandItem
-                key={project.value}
-                value={project.value}
+                key={project.id}
+                value={project.title}
                 onSelect={(value) => {
                   setSelectedStatus(
-                    projects.find((project) => project.value === value) || null,
+                    projects.find((project) => project.title === value) || null,
                   );
                   setOpen(false);
                 }}
               >
-                {project.label}
+                {project.title}
               </CommandItem>
             ))}
         </CommandGroup>
