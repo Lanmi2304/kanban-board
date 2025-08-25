@@ -39,7 +39,7 @@ export default async function DashboardLayout({
           />
           <ComboBoxResponsive title="Select project" projects={projects} />
         </header>
-        {children}
+        <div className="w-full overflow-x-hidden px-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

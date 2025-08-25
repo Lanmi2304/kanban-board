@@ -38,13 +38,13 @@ export default async function RootLayout({
               className="object-cover"
             />
           </div> */}
-          <div className="w-full px-4">
-            <div className="fixed top-2 right-5 z-30">
-              <ModeToggle />
-            </div>
-
-            <NuqsAdapter>{children}</NuqsAdapter>
+          {/* <div className="w-full px-4"> */}
+          <div className="fixed top-2 right-5 z-30">
+            <ModeToggle />
           </div>
+
+          <NuqsAdapter>{children}</NuqsAdapter>
+          {/* </div> */}
           <Toaster />
         </ThemeProvider>
       </body>

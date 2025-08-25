@@ -149,23 +149,23 @@ export function KanbanBoard({ tasks, cards }: KanbanBoardProps) {
         + Add Card
       </Button>
 
-      <div className="flex w-full flex-col justify-start gap-4 overflow-x-scroll md:flex-row">
+      <div className="flex flex-col justify-start gap-4 overflow-x-scroll md:flex-row">
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           {cards?.map((card) => (
             <Droppable
               key={card.id}
               id={card.id}
-              className="flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-visible rounded-lg border p-4 md:shrink"
+              className="flex h-[560px] min-w-80 shrink-0 flex-col overflow-y-visible rounded-lg border p-4"
             >
               <div className="h-1/5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div
                       className={cn("size-4 rounded-full ring-2", {
-                        "ring-blue-500": card.id === "ready",
-                        "ring-amber-500": card.id === "in-progress",
-                        "ring-purple-500": card.id === "in-review",
-                        "ring-green-500": card.id === "done",
+                        "ring-blue-500": card.id.includes("ready"),
+                        "ring-amber-500": card.id.includes("in-progress"),
+                        "ring-purple-500": card.id.includes("in-review"),
+                        "ring-green-500": card.id.includes("done"),
                       })}
                     ></div>
                     <h1 className="font-semibold">{card.title}</h1>
@@ -181,40 +181,41 @@ export function KanbanBoard({ tasks, cards }: KanbanBoardProps) {
               </div>
 
               <div className="mt-2 flex h-4/5 w-full flex-col gap-2 overflow-y-scroll">
-                {/* {(tasksByCard[card.id] || []).map((task) => ( */}
-                {tasks?.map((task) => (
-                  <Draggable
-                    key={task.id}
-                    id={task.id}
-                    className={cn(
-                      "bg-muted/60 relative z-50 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
-                      {
-                        "border-blue-500": card.id === "ready",
-                        "border-amber-500": card.id === "in-progress",
-                        "border-purple-500": card.id === "in-review",
-                        "border-green-500": card.id === "done",
-                      },
-                    )}
-                  >
-                    <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                      {task.description}
-                    </p>
-                    <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
-                      <div>
-                        <span className="truncate">{task.title} </span>
-                        {task.priority === "high" && (
-                          <span className="animate-jumping inline-block font-bold text-red-600">
-                            !
-                          </span>
-                        )}
+                {tasks
+                  ?.filter((task) => task.cardId === card.id)
+                  .map((task) => (
+                    <Draggable
+                      key={task.id}
+                      id={task.id}
+                      className={cn(
+                        "bg-muted/60 relative z-50 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
+                        {
+                          "border-blue-500": card.id === "ready",
+                          "border-amber-500": card.id === "in-progress",
+                          "border-purple-500": card.id === "in-review",
+                          "border-green-500": card.id === "done",
+                        },
+                      )}
+                    >
+                      <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                        {task.description}
+                      </p>
+                      <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
+                        <div>
+                          <span className="truncate">{task.title} </span>
+                          {task.priority === "high" && (
+                            <span className="animate-jumping inline-block font-bold text-red-600">
+                              !
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                          <Calendar className="size-4" />{" "}
+                          {task.dueDate.toLocaleDateString()}
+                        </span>
                       </div>
-                      <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                        <Calendar className="size-4" />{" "}
-                        {task.dueDate.toLocaleDateString()}
-                      </span>
-                    </div>
-                  </Draggable>
-                ))}
+                    </Draggable>
+                  ))}
               </div>
             </Droppable>
           ))}

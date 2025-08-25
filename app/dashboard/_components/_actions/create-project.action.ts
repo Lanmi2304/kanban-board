@@ -13,28 +13,28 @@ export const createNewProjectAction = authActionClient
     const projectId = crypto.randomUUID();
     const DEFAULT_CARDS: InsertCards[] = [
       {
-        id: "ready",
+        id: `${projectId}-ready`,
         title: "Ready",
         description: "This is ready to be picked up",
         userId,
         projectId,
       },
       {
-        id: "in-progress",
+        id: `${projectId}-in-progress`,
         title: "In Progress",
         description: "This task is currently being worked on",
         userId,
         projectId,
       },
       {
-        id: "in-review",
+        id: `${projectId}-in-review`,
         title: "In Review",
         description: "This task is currently being reviewed",
         userId,
         projectId,
       },
       {
-        id: "done",
+        id: `${projectId}-done`,
         title: "Done",
         description: "This task is completed",
         userId,
@@ -52,6 +52,7 @@ export const createNewProjectAction = authActionClient
     await db.insert(cards).values(DEFAULT_CARDS);
 
     revalidatePath(`/dashboard`);
+
     return {
       success: true,
     };

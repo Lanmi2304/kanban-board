@@ -3,7 +3,6 @@ import { getSession } from "@/lib/utils/get-session";
 import { getProjects } from "./_repositories/get-projects-repository";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default async function Dashboard() {
   const data = await getSession();
@@ -26,13 +25,7 @@ export default async function Dashboard() {
           <div className="flex w-full items-center justify-between">
             <h1 className="text-3xl font-bold">Your Projects</h1>
             {/* TODO: refactor to client component*/}
-            <Button
-              // onClick={() => console.log("Add project")}
-              variant="outline"
-              className="w-fit cursor-pointer"
-            >
-              + Add Project
-            </Button>
+            <CreateProjectDialog />
           </div>
           <div className="grid w-full gap-4">
             {projects.map((project) => (
