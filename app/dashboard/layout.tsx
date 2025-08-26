@@ -30,7 +30,7 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="overflow-x-hidden">
+      <SidebarInset className="mb-10 w-fit overflow-x-hidden">
         <header className="bg-background fixed top-0 z-20 flex h-16 w-full shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator
@@ -39,7 +39,7 @@ export default async function DashboardLayout({
           />
           <ComboBoxResponsive title="Select project" projects={projects} />
         </header>
-        <div className="w-full overflow-x-hidden px-4">{children}</div>
+        <div className="w-full px-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
