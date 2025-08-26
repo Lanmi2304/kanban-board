@@ -12,6 +12,6 @@ export async function getCardsByProjectId(projectId: string) {
     return data;
   } catch (error) {
     console.log("Error fetching cards:", error);
-    return null;
+    return [];
   }
 }

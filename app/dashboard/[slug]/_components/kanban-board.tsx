@@ -12,8 +12,8 @@ import { Draggable } from "../../_components/draggable";
 import { cn } from "@/lib/utils/cn";
 import { Calendar, Ellipsis, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SelectCards, Tasks } from "@/server/db/schema";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-areat";
+import { Projects, SelectCards, Tasks } from "@/server/db/schema";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 // import { Tasks } from "@/server/db/schema";
 
@@ -87,9 +87,10 @@ import { Card } from "@/components/ui/card";
 type KanbanBoardProps = {
   tasks?: Tasks[];
   cards?: SelectCards[] | null;
+  project: Projects;
 };
 
-export function KanbanBoard({ tasks, cards }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
   // const [state, setState] = useState<{ tasks: TaskType[]; cards: CardType[] }>(
   //   () => ({
   //     tasks: TASKS,
@@ -141,7 +142,7 @@ export function KanbanBoard({ tasks, cards }: KanbanBoardProps) {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Project title</h1>
+        <h1 className="text-2xl font-bold">{project.title}</h1>
         <Button className="w-fit cursor-pointer" variant="outline">
           <Settings />
         </Button>

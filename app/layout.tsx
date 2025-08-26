@@ -19,7 +19,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log(await getSession());
   return (
     <html lang="en" suppressHydrationWarning className={inter.className}>
       <head />
@@ -30,21 +29,12 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* <div className="fixed -top-10 h-30 w-full md:top-0 lg:h-20">
-            <Image
-              src={wave}
-              alt="Kanban Method"
-              fill
-              className="object-cover"
-            />
-          </div> */}
-          {/* <div className="w-full px-4"> */}
           <div className="fixed top-2 right-5 z-30">
             <ModeToggle />
           </div>
 
           <NuqsAdapter>{children}</NuqsAdapter>
-          {/* </div> */}
+
           <Toaster />
         </ThemeProvider>
       </body>

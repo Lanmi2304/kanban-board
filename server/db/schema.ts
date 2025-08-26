@@ -118,6 +118,7 @@ export const cards = pgTable("cards", {
 });
 
 export type Projects = typeof projects.$inferSelect;
+
 export type Tasks = typeof tasks.$inferSelect;
 
 export type InsertCards = typeof cards.$inferInsert;
