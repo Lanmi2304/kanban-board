@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-
+import { useQueryState } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -20,6 +20,7 @@ import {
 import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { Search } from "lucide-react";
 import { Projects } from "@/server/db/schema";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 type Props = {
   title: string;
@@ -114,27 +115,47 @@ function StatusList({
   setSelectedStatus: (status: Projects | null) => void;
   projects?: Projects[];
 }) {
+  const [query, setQuery] = useQueryState("project-query", {
+    defaultValue: "",
+  });
+  const debouncedSearch = useDebounce(query, 300);
+
+  const filteredProjects = React.useMemo(() => {
+    if (!projects) return [];
+    if (!debouncedSearch) return projects;
+
+    return projects.filter((project) =>
+      project.title.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    );
+  }, [projects, debouncedSearch]);
+
   return (
     <Command>
-      <CommandInput placeholder="Filter projects..." />
+      <CommandInput
+        placeholder="Filter projects..."
+        value={query}
+        onValueChange={setQuery}
+      />
       <CommandList>
         <CommandEmpty>No projects found.</CommandEmpty>
         <CommandGroup>
-          {projects &&
-            projects.map((project) => (
-              <CommandItem
-                key={project.id}
-                value={project.title}
-                onSelect={(value) => {
-                  setSelectedStatus(
-                    projects.find((project) => project.title === value) || null,
-                  );
-                  setOpen(false);
-                }}
-              >
-                {project.title}
-              </CommandItem>
-            ))}
+          <CommandItem value="all">All Projects</CommandItem>
+          {filteredProjects.map((project) => (
+            <CommandItem
+              key={project.id}
+              value={project.title}
+              onSelect={(value) => {
+                setSelectedStatus(
+                  filteredProjects.find((project) => project.title === value) ||
+                    null,
+                );
+                setOpen(false);
+              }}
+              className="cursor-pointer"
+            >
+              {project.title}
+            </CommandItem>
+          ))}
         </CommandGroup>
       </CommandList>
     </Command>
