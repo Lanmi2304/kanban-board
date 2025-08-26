@@ -12,7 +12,7 @@ export function SideBarCalendar() {
   const [date, setDate] = React.useState<Date | undefined>();
 
   return (
-    <Card className="w-fit rounded-t-none py-4">
+    <Card className="w-full rounded-t-none py-4">
       <CardContent className="px-4">
         <Calendar
           mode="single"

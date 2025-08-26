@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { en } from "zod/v4/locales";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -60,11 +61,10 @@ export const verification = pgTable("verification", {
   ),
 });
 
-export const tasks = pgTable("tasks", {
+export const projects = pgTable("projects", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
@@ -75,3 +75,51 @@ export const tasks = pgTable("tasks", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 });
+
+export const tasks = pgTable("tasks", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull(),
+  cardId: text("card_id").notNull(),
+  // TODO: ENUM
+  priority: text("priority").notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+});
+
+export const cards = pgTable("cards", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+});
+
+export type Projects = typeof projects.$inferSelect;
+
+export type Tasks = typeof tasks.$inferSelect;
+
+export type InsertCards = typeof cards.$inferInsert;
+export type SelectCards = typeof cards.$inferSelect;
