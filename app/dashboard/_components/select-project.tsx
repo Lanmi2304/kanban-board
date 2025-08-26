@@ -139,7 +139,6 @@ function StatusList({
       <CommandList>
         <CommandEmpty>No projects found.</CommandEmpty>
         <CommandGroup>
-          <CommandItem value="all">All Projects</CommandItem>
           {filteredProjects.map((project) => (
             <CommandItem
               key={project.id}
