@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Projects, SelectCards, Tasks } from "@/server/db/schema";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
+import { AddTaskDialog } from "./add-taks.dialog";
 // import { Tasks } from "@/server/db/schema";
 
 // type TaskType = {
@@ -183,9 +184,7 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                     <p className="text-muted-foreground text-sm">
                       {card.description}
                     </p>
-                    <Button className="mt-2 w-full" variant="outline">
-                      + Add Task
-                    </Button>
+                    <AddTaskDialog />
                   </div>
 
                   <ScrollArea className="mt-2 flex h-4/5 w-full flex-col gap-2">

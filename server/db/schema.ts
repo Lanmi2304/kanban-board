@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
 import { en } from "zod/v4/locales";
 
 export const user = pgTable("user", {
@@ -82,6 +82,16 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   status: text("status").notNull(),
   cardId: text("card_id").notNull(),
+  content: jsonb("content")
+    .$type<{
+      type: string;
+      content: Array<{
+        type: string;
+        content?: Array<unknown>;
+        attrs?: Record<string, unknown>;
+      }>;
+    }>()
+    .notNull(),
   // TODO: ENUM
   priority: text("priority").notNull(),
   createdAt: timestamp("created_at")
