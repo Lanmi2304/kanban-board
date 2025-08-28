@@ -79,8 +79,6 @@ export const projects = pgTable("projects", {
 export const tasks = pgTable("tasks", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
-  description: text("description"),
-  status: text("status").notNull(),
   cardId: text("card_id").notNull(),
   content: jsonb("content")
     .$type<{
@@ -93,7 +91,7 @@ export const tasks = pgTable("tasks", {
     }>()
     .notNull(),
   // TODO: ENUM
-  priority: text("priority").notNull(),
+  priority: text("priority").default("medium").notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),

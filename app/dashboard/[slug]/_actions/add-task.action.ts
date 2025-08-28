@@ -8,15 +8,15 @@ export const addTaskAction = authActionClient
   .metadata({ actionName: "addBlogAction" })
   .inputSchema(addTaskSchema)
   .action(
-    async ({ parsedInput: { title, priority, content }, ctx: { userId } }) => {
+    async ({ parsedInput: { title, content, cardId }, ctx: { userId } }) => {
       // console.log("USER: ", user);
 
       const cleanContent = JSON.parse(JSON.stringify(content));
 
       await addTask({
         title,
-        priority,
         userId,
+        cardId,
         content: cleanContent,
       });
     },

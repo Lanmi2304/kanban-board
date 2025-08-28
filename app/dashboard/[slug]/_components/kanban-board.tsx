@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Projects, SelectCards, Tasks } from "@/server/db/schema";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { AddTaskDialog } from "./add-taks.dialog";
+import { AddTaskDialog } from "./add-task.dialog";
 // import { Tasks } from "@/server/db/schema";
 
 // type TaskType = {
@@ -184,7 +184,7 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                     <p className="text-muted-foreground text-sm">
                       {card.description}
                     </p>
-                    <AddTaskDialog />
+                    <AddTaskDialog cardId={card.id} />
                   </div>
 
                   <ScrollArea className="mt-2 flex h-4/5 w-full flex-col gap-2">
@@ -205,7 +205,7 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                           )}
                         >
                           <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                            {task.description}
+                            DEFAULT DESCRIPTION
                           </p>
                           <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
                             <div>
@@ -233,7 +233,7 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
               {activeTask ? (
                 <div className="bg-muted/90 rounded-lg border p-3 shadow-lg">
                   <p className="text-foreground/80 text-sm">
-                    {activeTask.description}
+                    DEFAULT DESCRIPTION ACTIVE TASK
                   </p>
                   <div className="mt-2 font-semibold">{activeTask.title}</div>
                 </div>

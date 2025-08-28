@@ -74,6 +74,7 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss";
+import { EditorContent as ContentType } from "@/app/dashboard/[slug]/_components/add-task.dialog";
 
 import content from "@/components/tiptap-templates/simple/data/content.json";
 
@@ -184,9 +185,7 @@ const MobileToolbarContent = ({
 export function SimpleEditor({
   setContent,
 }: {
-  setContent: React.Dispatch<
-    React.SetStateAction<PureEditorContent | undefined>
-  >;
+  setContent: React.Dispatch<React.SetStateAction<ContentType | undefined>>;
 }) {
   const isMobile = useIsMobile();
   const { height } = useWindowSize();

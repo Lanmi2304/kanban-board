@@ -13,19 +13,24 @@ type TaskContent = {
 
 export async function addTask({
   title,
-  priority,
   userId,
+  cardId,
   content,
 }: {
   title: string;
-  priority: string;
+  // priority: string;
   userId: string;
+  cardId: string;
   content: TaskContent;
 }) {
   await db.insert(tasks).values({
+    id: crypto.randomUUID(),
+    projectId: "default-project-id", // Replace with actual projectId as needed
     title,
-    priority,
+    cardId,
+    dueDate: new Date(),
     userId,
+    // description: "default description",
     content,
   });
 }
