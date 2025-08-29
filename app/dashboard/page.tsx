@@ -1,8 +1,6 @@
 import { CreateProjectDialog } from "./_components/create-project-dialog";
 import { getSession } from "@/lib/utils/get-session";
 import { getProjects } from "./_repositories/get-projects-repository";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
 import { Projects } from "./_components/projects";
 
 export default async function Dashboard() {

@@ -16,6 +16,8 @@ import { Projects, SelectCards, Tasks } from "@/server/db/schema";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { AddTaskDialog } from "./add-task.dialog";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTasksByProjectId } from "../_actions/fetch-tasks.action";
 // import { Tasks } from "@/server/db/schema";
 
 // type TaskType = {
@@ -86,12 +88,11 @@ import { AddTaskDialog } from "./add-task.dialog";
 // ];
 
 type KanbanBoardProps = {
-  tasks?: Tasks[];
   cards?: SelectCards[] | null;
   project: Projects;
 };
 
-export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
+export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   // const [state, setState] = useState<{ tasks: TaskType[]; cards: CardType[] }>(
   //   () => ({
   //     tasks: TASKS,
@@ -100,6 +101,14 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
   // );
 
   const [activeTask, setActiveTask] = useState<Tasks | null>(null);
+  // Fetch tasks from the server using server action
+  const { data } = useQuery({
+    queryKey: ["tasks", project.id],
+    queryFn: async () => {
+      const response = await fetchTasksByProjectId(project.id);
+      return response;
+    },
+  });
 
   // const tasksByCard = React.useMemo(() => {
   //   return state.tasks.reduce<Record<string, Tasks[]>>((acc, task) => {
@@ -114,7 +123,7 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
 
   function handleDragStart(event: DragStartEvent) {
     const taskId = event.active.id as string;
-    const task = tasks?.find((t) => t.id === taskId);
+    const task = data?.find((t: Tasks) => t.id === taskId);
     if (task) setActiveTask(task);
   }
 
@@ -122,7 +131,7 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const taskId = active.id as string;
-      const updatedState = tasks?.map((task) =>
+      const updatedState = data?.map((task) =>
         task.id === taskId ? { ...task, cardId: over.id } : task,
       );
       // Update tasks
@@ -191,9 +200,9 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                   </div>
 
                   <ScrollArea className="mt-2 flex h-4/5 w-full flex-col gap-2">
-                    {tasks
-                      ?.filter((task) => task.cardId === card.id)
-                      .map((task) => (
+                    {data
+                      ?.filter((task: Tasks) => task.cardId === card.id)
+                      .map((task: Tasks) => (
                         <Draggable
                           key={task.id}
                           id={task.id}

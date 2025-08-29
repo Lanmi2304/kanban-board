@@ -19,6 +19,7 @@
         "@radix-ui/react-separator": "^1.1.7",
         "@radix-ui/react-slot": "^1.2.3",
         "@radix-ui/react-tooltip": "^1.2.8",
+        "@tanstack/react-query": "^5.85.5",
         "@tiptap/extension-highlight": "^3.3.0",
         "@tiptap/extension-horizontal-rule": "^3.3.0",
         "@tiptap/extension-image": "^3.3.0",
@@ -58,6 +59,7 @@
       "devDependencies": {
         "@eslint/eslintrc": "^3",
         "@tailwindcss/postcss": "^4",
+        "@tanstack/eslint-plugin-query": "^5.83.1",
         "@types/lodash.throttle": "^4.1.9",
         "@types/node": "^20",
         "@types/react": "^19",
@@ -443,6 +445,12 @@
     "@tailwindcss/oxide-win32-x64-msvc": ["@tailwindcss/oxide-win32-x64-msvc@4.1.11", "", { "os": "win32", "cpu": "x64" }, "sha512-YfHoggn1j0LK7wR82TOucWc5LDCguHnoS879idHekmmiR7g9HUtMw9MI0NHatS28u/Xlkfi9w5RJWgz2Dl+5Qg=="],
 
     "@tailwindcss/postcss": ["@tailwindcss/postcss@4.1.11", "", { "dependencies": { "@alloc/quick-lru": "^5.2.0", "@tailwindcss/node": "4.1.11", "@tailwindcss/oxide": "4.1.11", "postcss": "^8.4.41", "tailwindcss": "4.1.11" } }, "sha512-q/EAIIpF6WpLhKEuQSEVMZNMIY8KhWoAemZ9eylNAih9jxMGAYPPWBn3I9QL/2jZ+e7OEz/tZkX5HwbBR4HohA=="],
+
+    "@tanstack/eslint-plugin-query": ["@tanstack/eslint-plugin-query@5.83.1", "", { "dependencies": { "@typescript-eslint/utils": "^8.37.0" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0" } }, "sha512-tdkpPFfzkTksN9BIlT/qjixSAtKrsW6PUVRwdKWaOcag7DrD1vpki3UzzdfMQGDRGeg1Ue1Dg+rcl5FJGembNg=="],
+
+    "@tanstack/query-core": ["@tanstack/query-core@5.85.5", "", {}, "sha512-KO0WTob4JEApv69iYp1eGvfMSUkgw//IpMnq+//cORBzXf0smyRwPLrUvEe5qtAEGjwZTXrjxg+oJNP/C00t6w=="],
+
+    "@tanstack/react-query": ["@tanstack/react-query@5.85.5", "", { "dependencies": { "@tanstack/query-core": "5.85.5" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-/X4EFNcnPiSs8wM2v+b6DqS5mmGeuJQvxBglmDxl6ZQb5V26ouD2SJYAcC3VjbNwqhY2zjxVD15rDA5nGbMn3A=="],
 
     "@tiptap/core": ["@tiptap/core@3.3.0", "", { "peerDependencies": { "@tiptap/pm": "^3.3.0" } }, "sha512-YAmFITHzgp/hafA7Ety1qMo4Tl5e5b2+06LaiB9k3rAI7gfO6AXCwhXUqm3fCScmBfMMvMycq9IOIiHk946IzA=="],
 

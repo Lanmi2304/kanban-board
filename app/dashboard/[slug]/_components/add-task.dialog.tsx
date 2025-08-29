@@ -27,6 +27,8 @@ import { useForm } from "react-hook-form";
 import { AddTaskInput, addTaskSchema } from "../_schemas/add-task.schema";
 import { toast } from "sonner";
 import { addTaskAction } from "../_actions/add-task.action";
+import { addTaskService } from "../_services/add-task.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type ContentNode = {
   type: string;
@@ -55,12 +57,35 @@ export function AddTaskDialog({
       projectId: projectId,
     },
   });
+  const queryClient = useQueryClient();
+  const { data, isRefetching, refetch } = useQuery({
+    queryKey: ["tasks", cardId, projectId],
+    queryFn: () =>
+      addTaskService({
+        title: form.getValues("title"),
+        cardId,
+        projectId,
+        content: content!,
+      }),
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newTodo: AddTaskInput) => {
+      await addTaskAction(newTodo);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "An error occurred");
+    },
+    onSuccess: () => {
+      toast.success("Task added successfully!");
+      form.reset();
+      // queryClient.invalidateQueries(["tasks"]);
+    },
+  });
 
   const [isPending, startTransition] = useTransition();
   //   const router = useRouter();
   async function onSubmit(values: AddTaskInput) {
-    console.log("submit fired!", values, content);
-
     startTransition(async () => {
       if (!content) {
         toast.error("Task content is required!");
@@ -75,16 +100,7 @@ export function AddTaskDialog({
         content,
       };
 
-      console.log("Submitting task:", task);
-      const result = await addTaskAction(task);
-
-      if (result.data?.serverError || result.validationErrors) {
-        toast.error(result.data?.serverError || "An error occurred!");
-        console.error("Task creation failed:", result);
-      } else {
-        toast.success("Task successfully created!");
-        form.reset();
-      }
+      mutation.mutate(task);
     });
   }
 
