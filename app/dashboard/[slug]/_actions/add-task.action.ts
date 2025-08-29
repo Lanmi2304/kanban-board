@@ -13,7 +13,6 @@ export const addTaskAction = authActionClient
       ctx: { userId },
     }) => {
       try {
-        // Ensure the content is properly structured
         const cleanContent = JSON.parse(JSON.stringify(content));
 
         await addTask({
