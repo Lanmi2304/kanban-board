@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { AddTaskInput, addTaskSchema } from "../_schemas/add-task.schema";
 import { toast } from "sonner";
@@ -39,41 +39,60 @@ export type EditorContent = {
   content: ContentNode[];
 };
 
-export function AddTaskDialog({ cardId }: { cardId: string }) {
+export function AddTaskDialog({
+  cardId,
+  projectId,
+}: {
+  cardId: string;
+  projectId: string;
+}) {
   const [content, setContent] = useState<EditorContent | undefined>();
   const form = useForm<AddTaskInput>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
       title: "",
-      cardId: "",
+      cardId: cardId,
+      projectId: projectId,
     },
   });
 
   const [isPending, startTransition] = useTransition();
   //   const router = useRouter();
-  const onSubmit = async (values: AddTaskInput) => {
+  async function onSubmit(values: AddTaskInput) {
     console.log("submit fired!", values, content);
+
     startTransition(async () => {
-      if (!content) return;
+      if (!content) {
+        toast.error("Task content is required!");
+        return;
+      }
+
       const task = {
         ...values,
         dueDate: new Date(),
         cardId,
+        projectId,
         content,
       };
 
-      // console.log(123, task);
+      console.log("Submitting task:", task);
       const result = await addTaskAction(task);
 
-      if (result.serverError || result.validationErrors) {
-        toast.error(result.serverError || "An error occurred!");
+      if (result.data?.serverError || result.validationErrors) {
+        toast.error(result.data?.serverError || "An error occurred!");
+        console.error("Task creation failed:", result);
       } else {
         toast.success("Task successfully created!");
-        // router.push("/");
         form.reset();
       }
     });
-  };
+  }
+
+  useEffect(() => {
+    if (content) {
+      form.setValue("content", content, { shouldValidate: true });
+    }
+  }, [content, form]);
 
   return (
     <Dialog>
@@ -115,15 +134,19 @@ export function AddTaskDialog({ cardId }: { cardId: string }) {
               )}
             />
 
+            {/* Without this fix my onSubmit handler wont even fire */}
+            <input type="hidden" {...form.register("cardId")} />
+            <input type="hidden" {...form.register("projectId")} />
+
             <SimpleEditor setContent={setContent} />
 
             <DialogFooter>
-              <DialogClose asChild>
+              <DialogClose asChild className="dialog-close">
                 <Button variant="outline" type="button">
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isPending || !content}>
+              <Button type="submit" disabled={isPending}>
                 {isPending ? "Adding..." : "Add task"}
               </Button>
             </DialogFooter>

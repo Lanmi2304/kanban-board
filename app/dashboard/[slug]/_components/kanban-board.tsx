@@ -184,7 +184,10 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                     <p className="text-muted-foreground text-sm">
                       {card.description}
                     </p>
-                    <AddTaskDialog cardId={card.id} />
+                    <AddTaskDialog
+                      cardId={card.id}
+                      projectId={card.projectId}
+                    />
                   </div>
 
                   <ScrollArea className="mt-2 flex h-4/5 w-full flex-col gap-2">
@@ -197,10 +200,12 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                           className={cn(
                             "bg-muted/60 relative z-50 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
                             {
-                              "border-blue-500": card.id === "ready",
-                              "border-amber-500": card.id === "in-progress",
-                              "border-purple-500": card.id === "in-review",
-                              "border-green-500": card.id === "done",
+                              "border-blue-500": card.id.includes("ready"),
+                              "border-amber-500":
+                                card.id.includes("in-progress"),
+                              "border-purple-500":
+                                card.id.includes("in-review"),
+                              "border-green-500": card.id.includes("done"),
                             },
                           )}
                         >

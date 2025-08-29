@@ -3,6 +3,7 @@ import z from "zod";
 export const addTaskSchema = z.object({
   title: z.string().min(1),
   cardId: z.string().min(1),
+  projectId: z.string().min(1),
   // priority: z.enum(["low", "medium", "high"]).optional().default("medium"),
   content: z.object({
     type: z.string(),
