@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -26,17 +26,12 @@ type KanbanBoardProps = {
 };
 
 export function KanbanBoard({ cards, project }: KanbanBoardProps) {
-  // const [state, setState] = useState<{ tasks: TaskType[]; cards: CardType[] }>(
-  //   () => ({
-  //     tasks: TASKS,
-  //     cards: DEFAULT_CARDS,
-  //   }),
-  // );
-
   const [activeTask, setActiveTask] = useState<Tasks | null>(null);
+  const [localTasks, setLocalTasks] = useState<Tasks[]>([]);
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
-  const { data = [] } = useQuery({
+
+  const { data } = useQuery({
     queryKey: ["tasks", project.id],
     queryFn: async () => {
       const response = await fetchTasksByProjectId(project.id);
@@ -44,16 +39,11 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
     },
   });
 
-  // const tasksByCard = React.useMemo(() => {
-  //   return state.tasks.reduce<Record<string, Tasks[]>>((acc, task) => {
-  //     const cardId = task.cardId as string;
-  //     if (!acc[cardId]) {
-  //       acc[cardId] = [];
-  //     }
-  //     acc[cardId].push(task);
-  //     return acc;
-  //   }, {});
-  // }, [state]);
+  useEffect(() => {
+    if (data && Array.isArray(data)) {
+      setLocalTasks(data);
+    }
+  }, [data]);
 
   const mutation = useMutation({
     mutationFn: (variables: { cardId: string; projectId: string }) =>
@@ -61,15 +51,11 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
     onMutate: async (newData) => {
       await queryClient.cancelQueries({ queryKey: ["tasks", project.id] });
 
-      const previousTasks = queryClient.getQueryData(["tasks", project.id]);
+      // Rollback
+      const previousTasks = [...localTasks];
 
-      // Immediately update the activeTask for a better UX during the drag
-      if (activeTask && activeTask.id === newData.cardId) {
-        setActiveTask({ ...activeTask, cardId: newData.projectId });
-      }
-
-      queryClient.setQueryData(["tasks", project.id], (old: Tasks[] = []) =>
-        old.map((task) =>
+      setLocalTasks((prev) =>
+        prev.map((task) =>
           task.id === newData.cardId
             ? { ...task, cardId: newData.projectId }
             : task,
@@ -79,12 +65,15 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
       return { previousTasks };
     },
     onError: (err, newData, context) => {
+      if (context?.previousTasks) {
+        setLocalTasks(context.previousTasks);
+      }
       toast.error("Error moving task");
-      queryClient.setQueryData(["tasks", project.id], context?.previousTasks);
-      // console.error("Error toggling task state:", err);
+    },
+    onSuccess: () => {
+      toast.success("Task moved successfully");
     },
     onSettled: () => {
-      toast.success("Task moved successfully");
       queryClient.invalidateQueries({ queryKey: ["tasks", project.id] });
     },
   });
@@ -92,34 +81,35 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   function handleDragStart(event: DragStartEvent) {
     setIsDragging(true);
     const taskId = event.active.id as string;
-    const task = Array.isArray(data)
-      ? data.find((t: Tasks) => t.id === taskId)
-      : null;
+    const task = localTasks.find((t) => t.id === taskId) || null;
     if (task) setActiveTask(task);
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setIsDragging(false);
     const { active, over } = event;
+
     if (over && active.id !== over.id) {
       const taskId = active.id as string;
+      const targetCardId = over.id as string;
 
-      if (activeTask) {
-        setActiveTask({ ...activeTask, cardId: over.id as string });
-      }
-      mutation.mutate(
-        { cardId: taskId, projectId: over.id as string },
-        {
-          onSuccess: () => {
-            setActiveTask(null);
-            setIsDragging(false);
-          },
-        },
+      setLocalTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId ? { ...task, cardId: targetCardId } : task,
+        ),
       );
-    } else {
-      setActiveTask(null);
-      setIsDragging(false);
+
+      if (activeTask && activeTask.id === taskId) {
+        setActiveTask({ ...activeTask, cardId: targetCardId });
+      }
+
+      mutation.mutate({ cardId: taskId, projectId: targetCardId });
     }
+
+    // Set isDragging to false after a short delay to allow the animation to complete
+    setTimeout(() => {
+      setIsDragging(false);
+      setActiveTask(null);
+    }, 50);
   }
 
   // function handleAddNewCard() {
@@ -189,69 +179,79 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                   </div>
 
                   <ScrollArea className="flex h-4/5 w-full flex-col">
-                    {Array.isArray(data) &&
-                      data
-                        .filter((task: Tasks) => task.cardId === card.id)
-                        .map((task: Tasks) => (
-                          <Draggable
-                            key={task.id}
-                            id={task.id}
-                            className={cn(
-                              "bg-muted/60 relative z-50 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
-                              {
-                                "border-blue-500": card.id.includes("ready"),
-                                "border-amber-500":
-                                  card.id.includes("in-progress"),
-                                "border-purple-500":
-                                  card.id.includes("in-review"),
-                                "border-green-500": card.id.includes("done"),
-                              },
-                              activeTask?.id === task.id
-                                ? "opacity-0"
-                                : "opacity-100",
-                            )}
-                          >
-                            <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                              DEFAULT DESCRIPTION
-                            </p>
-                            <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
-                              <div>
-                                <span className="inline-block w-40 truncate">
-                                  {task.title}{" "}
-                                </span>
-                                {task.priority === "high" && (
-                                  <span className="animate-jumping inline-block font-bold text-red-600">
-                                    !
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                                <Calendar className="size-4" />{" "}
-                                {task.dueDate.toLocaleDateString()}
+                    {localTasks
+                      .filter((task: Tasks) => task.cardId === card.id)
+                      .map((task: Tasks) => (
+                        <Draggable
+                          key={task.id}
+                          id={task.id}
+                          className={cn(
+                            "bg-muted/60 relative z-50 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
+                            {
+                              "border-blue-500": card.id.includes("ready"),
+                              "border-amber-500":
+                                card.id.includes("in-progress"),
+                              "border-purple-500":
+                                card.id.includes("in-review"),
+                              "border-green-500": card.id.includes("done"),
+                            },
+                            activeTask?.id === task.id
+                              ? "opacity-0"
+                              : "opacity-100",
+                          )}
+                        >
+                          <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                            DEFAULT DESCRIPTION
+                          </p>
+                          <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
+                            <div>
+                              <span className="inline-block w-40 truncate">
+                                {task.title}{" "}
                               </span>
+                              {task.priority === "high" && (
+                                <span className="animate-jumping inline-block font-bold text-red-600">
+                                  !
+                                </span>
+                              )}
                             </div>
-                          </Draggable>
-                        ))}
+                            <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                              <Calendar className="size-4" />{" "}
+                              {task.dueDate.toLocaleDateString()}
+                            </span>
+                          </div>
+                        </Draggable>
+                      ))}
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </Droppable>
               </Card>
             ))}
 
-            <DragOverlay>
+            <DragOverlay
+              dropAnimation={{
+                duration: 0, // Disabled immediate
+              }}
+            >
               {activeTask && isDragging ? (
                 <div
                   className={cn(
-                    "bg-muted/90 scale-105 rotate-1 transform rounded-lg border p-3 shadow-lg",
+                    "bg-muted/90 scale-105 transform rounded-lg border p-3 shadow-lg",
                     {
-                      "border-blue-500": activeTask.cardId.includes("ready"),
-                      "border-amber-500":
+                      "border-blue-500 ring-1 ring-blue-300":
+                        activeTask.cardId.includes("ready"),
+                      "border-amber-500 ring-1 ring-amber-300":
                         activeTask.cardId.includes("in-progress"),
-                      "border-purple-500":
+                      "border-purple-500 ring-1 ring-purple-300":
                         activeTask.cardId.includes("in-review"),
-                      "border-green-500": activeTask.cardId.includes("done"),
+                      "border-green-500 ring-1 ring-green-300":
+                        activeTask.cardId.includes("done"),
                     },
                   )}
+                  style={{
+                    // Add transition for smooth color changes
+                    transition:
+                      "border-color 0.15s ease, box-shadow 0.15s ease",
+                  }}
                 >
                   <p className="text-foreground/80 text-sm">
                     DEFAULT DESCRIPTION ACTIVE TASK
@@ -265,6 +265,5 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
         </div>
       </ScrollArea>
     </div>
-    // </div>
   );
 }
