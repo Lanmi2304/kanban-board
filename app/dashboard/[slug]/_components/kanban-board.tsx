@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import {
   DndContext,
-  // UniqueIdentifier,
   DragEndEvent,
   DragStartEvent,
   DragOverlay,
@@ -16,76 +15,10 @@ import { Projects, SelectCards, Tasks } from "@/server/db/schema";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { AddTaskDialog } from "./add-task.dialog";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchTasksByProjectId } from "../_actions/fetch-tasks.action";
-// import { Tasks } from "@/server/db/schema";
-
-// type TaskType = {
-//   id: string;
-//   title: string;
-//   priority?: "low" | "medium" | "high";
-//   content: string;
-//   cardId: UniqueIdentifier;
-//   createdAt: string;
-//   dueDate: string;
-// };
-
-// type CardType = {
-//   id: string;
-//   title: string;
-//   content: string;
-// };
-
-// const DEFAULT_CARDS: CardType[] = [
-//   { id: "ready", title: "Ready", content: "This is ready to be picked up" },
-//   { id: "in-progress", title: "In Progress", content: "This is in progress" },
-//   { id: "in-review", title: "In Review", content: "This is in review" },
-//   { id: "done", title: "Done", content: "This is done" },
-// ];
-
-// const TASKS: TaskType[] = [
-//   {
-//     id: "task-1",
-//     title: "Do the homework",
-//     content: "This is task 1",
-//     cardId: "ready",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-2",
-//     title: "Wash the car",
-//     priority: "high",
-//     content: "This is task 2",
-//     cardId: "in-progress",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-3",
-//     title: "Buy groceries",
-//     content: "This is task 3",
-//     cardId: "in-review",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-4",
-//     title: "Clean the house",
-//     content: "This is task 4",
-//     cardId: "done",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-5",
-//     title: "Clean the room",
-//     content: "This is task 5",
-//     cardId: "done",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-// ];
+import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
+import { toast } from "sonner";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -101,12 +34,13 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   // );
 
   const [activeTask, setActiveTask] = useState<Tasks | null>(null);
-  // Fetch tasks from the server using server action
-  const { data } = useQuery({
+  const queryClient = useQueryClient();
+  const [isDragging, setIsDragging] = useState(false);
+  const { data = [] } = useQuery({
     queryKey: ["tasks", project.id],
     queryFn: async () => {
       const response = await fetchTasksByProjectId(project.id);
-      return response;
+      return response || [];
     },
   });
 
@@ -121,23 +55,71 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   //   }, {});
   // }, [state]);
 
+  const mutation = useMutation({
+    mutationFn: (variables: { cardId: string; projectId: string }) =>
+      toggleTaskStateAction(variables),
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks", project.id] });
+
+      const previousTasks = queryClient.getQueryData(["tasks", project.id]);
+
+      // Immediately update the activeTask for a better UX during the drag
+      if (activeTask && activeTask.id === newData.cardId) {
+        setActiveTask({ ...activeTask, cardId: newData.projectId });
+      }
+
+      queryClient.setQueryData(["tasks", project.id], (old: Tasks[] = []) =>
+        old.map((task) =>
+          task.id === newData.cardId
+            ? { ...task, cardId: newData.projectId }
+            : task,
+        ),
+      );
+
+      return { previousTasks };
+    },
+    onError: (err, newData, context) => {
+      toast.error("Error moving task");
+      queryClient.setQueryData(["tasks", project.id], context?.previousTasks);
+      // console.error("Error toggling task state:", err);
+    },
+    onSettled: () => {
+      toast.success("Task moved successfully");
+      queryClient.invalidateQueries({ queryKey: ["tasks", project.id] });
+    },
+  });
+
   function handleDragStart(event: DragStartEvent) {
+    setIsDragging(true);
     const taskId = event.active.id as string;
-    const task = data?.find((t: Tasks) => t.id === taskId);
+    const task = Array.isArray(data)
+      ? data.find((t: Tasks) => t.id === taskId)
+      : null;
     if (task) setActiveTask(task);
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    setIsDragging(false);
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const taskId = active.id as string;
-      const updatedState = data?.map((task) =>
-        task.id === taskId ? { ...task, cardId: over.id } : task,
+
+      if (activeTask) {
+        setActiveTask({ ...activeTask, cardId: over.id as string });
+      }
+      mutation.mutate(
+        { cardId: taskId, projectId: over.id as string },
+        {
+          onSuccess: () => {
+            setActiveTask(null);
+            setIsDragging(false);
+          },
+        },
       );
-      // Update tasks
-      // setState({ ...state, tasks: updatedState });
+    } else {
+      setActiveTask(null);
+      setIsDragging(false);
     }
-    setActiveTask(null);
   }
 
   // function handleAddNewCard() {
@@ -162,10 +144,6 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
         + Add Card
       </Button>
 
-      {/* <div
-        className="flex flex-col gap-4 overflow-x-scroll md:flex-row"
-        // style={{ scrollPadding: "1rem" }}
-      > */}
       <ScrollArea>
         <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
           <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -173,7 +151,18 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
               <Card key={card.id} className="m-0 overflow-hidden p-0">
                 <Droppable
                   id={card.id}
-                  className="flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80"
+                  className={cn(
+                    "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
+                    {
+                      "ring-2 ring-offset-2": isDragging,
+                      "ring-blue-500": isDragging && card.id.includes("ready"),
+                      "ring-amber-500":
+                        isDragging && card.id.includes("in-progress"),
+                      "ring-purple-500":
+                        isDragging && card.id.includes("in-review"),
+                      "ring-green-500": isDragging && card.id.includes("done"),
+                    },
+                  )}
                 >
                   <div className="h-1/5">
                     <div className="flex items-center justify-between">
@@ -199,44 +188,50 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                     />
                   </div>
 
-                  <ScrollArea className="mt-2 flex h-4/5 w-full flex-col gap-2">
-                    {data
-                      ?.filter((task: Tasks) => task.cardId === card.id)
-                      .map((task: Tasks) => (
-                        <Draggable
-                          key={task.id}
-                          id={task.id}
-                          className={cn(
-                            "bg-muted/60 relative z-50 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
-                            {
-                              "border-blue-500": card.id.includes("ready"),
-                              "border-amber-500":
-                                card.id.includes("in-progress"),
-                              "border-purple-500":
-                                card.id.includes("in-review"),
-                              "border-green-500": card.id.includes("done"),
-                            },
-                          )}
-                        >
-                          <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                            DEFAULT DESCRIPTION
-                          </p>
-                          <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
-                            <div>
-                              <span className="truncate">{task.title} </span>
-                              {task.priority === "high" && (
-                                <span className="animate-jumping inline-block font-bold text-red-600">
-                                  !
+                  <ScrollArea className="flex h-4/5 w-full flex-col">
+                    {Array.isArray(data) &&
+                      data
+                        .filter((task: Tasks) => task.cardId === card.id)
+                        .map((task: Tasks) => (
+                          <Draggable
+                            key={task.id}
+                            id={task.id}
+                            className={cn(
+                              "bg-muted/60 relative z-50 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
+                              {
+                                "border-blue-500": card.id.includes("ready"),
+                                "border-amber-500":
+                                  card.id.includes("in-progress"),
+                                "border-purple-500":
+                                  card.id.includes("in-review"),
+                                "border-green-500": card.id.includes("done"),
+                              },
+                              activeTask?.id === task.id
+                                ? "opacity-0"
+                                : "opacity-100",
+                            )}
+                          >
+                            <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                              DEFAULT DESCRIPTION
+                            </p>
+                            <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
+                              <div>
+                                <span className="inline-block w-40 truncate">
+                                  {task.title}{" "}
                                 </span>
-                              )}
+                                {task.priority === "high" && (
+                                  <span className="animate-jumping inline-block font-bold text-red-600">
+                                    !
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                                <Calendar className="size-4" />{" "}
+                                {task.dueDate.toLocaleDateString()}
+                              </span>
                             </div>
-                            <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                              <Calendar className="size-4" />{" "}
-                              {task.dueDate.toLocaleDateString()}
-                            </span>
-                          </div>
-                        </Draggable>
-                      ))}
+                          </Draggable>
+                        ))}
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </Droppable>
@@ -244,8 +239,20 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
             ))}
 
             <DragOverlay>
-              {activeTask ? (
-                <div className="bg-muted/90 rounded-lg border p-3 shadow-lg">
+              {activeTask && isDragging ? (
+                <div
+                  className={cn(
+                    "bg-muted/90 scale-105 rotate-1 transform rounded-lg border p-3 shadow-lg",
+                    {
+                      "border-blue-500": activeTask.cardId.includes("ready"),
+                      "border-amber-500":
+                        activeTask.cardId.includes("in-progress"),
+                      "border-purple-500":
+                        activeTask.cardId.includes("in-review"),
+                      "border-green-500": activeTask.cardId.includes("done"),
+                    },
+                  )}
+                >
                   <p className="text-foreground/80 text-sm">
                     DEFAULT DESCRIPTION ACTIVE TASK
                   </p>

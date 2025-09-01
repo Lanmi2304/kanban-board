@@ -49,6 +49,9 @@ export function AddTaskDialog({
   projectId: string;
 }) {
   const [content, setContent] = useState<EditorContent | undefined>();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
   const form = useForm<AddTaskInput>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
@@ -58,8 +61,9 @@ export function AddTaskDialog({
     },
   });
   const queryClient = useQueryClient();
-  const { data, isRefetching, refetch } = useQuery({
-    queryKey: ["tasks", cardId, projectId],
+
+  useQuery({
+    queryKey: ["tasks"],
     queryFn: () =>
       addTaskService({
         title: form.getValues("title"),
@@ -75,16 +79,16 @@ export function AddTaskDialog({
     },
     onError: (error) => {
       toast.error(error?.message || "An error occurred");
+      setIsDialogOpen(false);
     },
     onSuccess: () => {
+      setIsDialogOpen(false);
       toast.success("Task added successfully!");
       form.reset();
-      // queryClient.invalidateQueries(["tasks"]);
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 
-  const [isPending, startTransition] = useTransition();
-  //   const router = useRouter();
   async function onSubmit(values: AddTaskInput) {
     startTransition(async () => {
       if (!content) {
@@ -111,7 +115,7 @@ export function AddTaskDialog({
   }, [content, form]);
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="mt-2 w-full cursor-pointer">
           + Add Task
