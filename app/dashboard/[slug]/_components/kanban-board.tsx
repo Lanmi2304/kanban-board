@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchTasksByProjectId } from "../_actions/fetch-tasks.action";
 import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -31,7 +32,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["tasks", project.id],
     queryFn: async () => {
       const response = await fetchTasksByProjectId(project.id);
@@ -46,8 +47,9 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   }, [data]);
 
   const mutation = useMutation({
-    mutationFn: (variables: { cardId: string; projectId: string }) =>
+    mutationFn: (variables: { taskId: string; newCardId: string }) =>
       toggleTaskStateAction(variables),
+
     onMutate: async (newData) => {
       await queryClient.cancelQueries({ queryKey: ["tasks", project.id] });
 
@@ -56,8 +58,8 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
 
       setLocalTasks((prev) =>
         prev.map((task) =>
-          task.id === newData.cardId
-            ? { ...task, cardId: newData.projectId }
+          task.id === newData.taskId
+            ? { ...task, cardId: newData.newCardId }
             : task,
         ),
       );
@@ -68,7 +70,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
       if (context?.previousTasks) {
         setLocalTasks(context.previousTasks);
       }
-      toast.error("Error moving task");
+      toast.error(err.message || "Error moving task");
     },
     onSuccess: () => {
       toast.success("Task moved successfully");
@@ -87,23 +89,27 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    if (!over) return;
 
-    if (over && active.id !== over.id) {
-      const taskId = active.id as string;
-      const targetCardId = over.id as string;
+    const taskId = active.id as string;
+    const targetCardId = over.id as string;
+    const task = localTasks.find((t) => t.id === taskId);
 
-      setLocalTasks((prev) =>
-        prev.map((task) =>
-          task.id === taskId ? { ...task, cardId: targetCardId } : task,
-        ),
-      );
-
-      if (activeTask && activeTask.id === taskId) {
-        setActiveTask({ ...activeTask, cardId: targetCardId });
-      }
-
-      mutation.mutate({ cardId: taskId, projectId: targetCardId });
+    if (task && task.cardId === targetCardId) {
+      setIsDragging(false);
+      setActiveTask(null);
+      return;
     }
+
+    setLocalTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, cardId: targetCardId } : t)),
+    );
+
+    if (activeTask && activeTask.id === taskId) {
+      setActiveTask({ ...activeTask, cardId: targetCardId });
+    }
+
+    mutation.mutate({ taskId, newCardId: targetCardId });
 
     // Set isDragging to false after a short delay to allow the animation to complete
     setTimeout(() => {
@@ -179,6 +185,14 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                   </div>
 
                   <ScrollArea className="flex h-4/5 w-full flex-col">
+                    {isLoading &&
+                      Array.from({ length: 5 }).map((el, id) => (
+                        <Skeleton
+                          key={id}
+                          className="mt-2 h-18 w-full first:mt-0"
+                        />
+                      ))}
+
                     {localTasks
                       .filter((task: Tasks) => task.cardId === card.id)
                       .map((task: Tasks) => (

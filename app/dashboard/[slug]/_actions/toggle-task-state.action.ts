@@ -7,9 +7,9 @@ import { toggleTaskStateSchema } from "../_schemas/toggle-task-state.schema";
 export const toggleTaskStateAction = authActionClient
   .metadata({ actionName: "toggleTaskStateAction" })
   .inputSchema(toggleTaskStateSchema)
-  .action(async ({ parsedInput: { cardId, projectId }, ctx: { userId } }) => {
+  .action(async ({ parsedInput: { taskId, newCardId }, ctx: { userId } }) => {
     try {
-      await toggleTaskState(cardId, projectId, userId);
+      await toggleTaskState(taskId, newCardId, userId);
 
       return { success: true };
     } catch (error) {

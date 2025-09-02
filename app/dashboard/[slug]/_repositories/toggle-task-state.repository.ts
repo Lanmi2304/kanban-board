@@ -4,11 +4,11 @@ import { and, eq } from "drizzle-orm";
 
 export async function toggleTaskState(
   taskId: string,
-  cardStateId: string,
+  newCardId: string,
   userId: string,
 ) {
   await db
     .update(tasks)
-    .set({ cardId: cardStateId })
+    .set({ cardId: newCardId })
     .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)));
 }

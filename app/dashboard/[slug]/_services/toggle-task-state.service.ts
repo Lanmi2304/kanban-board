@@ -1,9 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
 
-export const toggleTaskStateService = (taskId: string, cardStateId: string) =>
+export const toggleTaskStateService = (taskId: string, newCardId: string) =>
   queryOptions({
     queryKey: ["toggleTaskStateService"],
-    queryFn: () =>
-      toggleTaskStateAction({ cardId: taskId, projectId: cardStateId }),
+    queryFn: () => toggleTaskStateAction({ taskId, newCardId }),
   });
