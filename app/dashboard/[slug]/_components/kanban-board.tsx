@@ -214,7 +214,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                           key={task.id}
                           id={task.id}
                           className={cn(
-                            "bg-muted/60 pointer-events-none relative z-50 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
+                            "bg-muted/60 relative z-50 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
                             {
                               "border-blue-500": card.id.includes("ready"),
                               "border-amber-500":
