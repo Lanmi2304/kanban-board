@@ -60,7 +60,8 @@ export function SignUpForm() {
       const imageFile = image ? await convertImageToBase64(image) : "";
       try {
         const response = await signUpAction({ ...values, image: imageFile });
-        router.push("/dashboard");
+        router.push("/sign-in");
+        toast.success("Sign up successful!");
         console.log("Sign up successful:", response);
       } catch (error) {
         toast.error("Error during sign up");
