@@ -102,7 +102,10 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (!over) return;
+    if (!over) {
+      setIsDragging(false);
+      return;
+    }
 
     const taskId = active.id as string;
     const targetCardId = over.id as string;
@@ -227,6 +230,9 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                                 card.id.includes("in-review"),
                               "border-green-500": card.id.includes("done"),
                             },
+                            activeTask?.id === task.id && isDragging
+                              ? "opacity-0"
+                              : "opacity-100",
                           )}
                         >
                           <div className="flex items-center justify-between">
