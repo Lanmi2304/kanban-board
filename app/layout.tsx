@@ -4,8 +4,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/switch-theme";
 import { Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { getSession } from "@/lib/utils/get-session";
 import { Toaster } from "@/components/ui/sonner";
+import QueryClientProviderWrapper from "@/components/providers/query-client-provider";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -32,10 +32,10 @@ export default async function RootLayout({
           <div className="fixed top-2 right-5 z-30">
             <ModeToggle />
           </div>
-
-          <NuqsAdapter>{children}</NuqsAdapter>
-
-          <Toaster />
+          <QueryClientProviderWrapper>
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </QueryClientProviderWrapper>
+          <Toaster richColors />
         </ThemeProvider>
       </body>
     </html>

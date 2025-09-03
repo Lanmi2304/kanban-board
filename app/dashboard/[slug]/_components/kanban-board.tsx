@@ -1,133 +1,130 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DndContext,
-  // UniqueIdentifier,
   DragEndEvent,
   DragStartEvent,
   DragOverlay,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import { Droppable } from "../../_components/droppable";
 import { Draggable } from "../../_components/draggable";
+import { MouseSensor } from "../../_components/smart-pointer-sensor";
 import { cn } from "@/lib/utils/cn";
 import { Calendar, Ellipsis, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Projects, SelectCards, Tasks } from "@/server/db/schema";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-// import { Tasks } from "@/server/db/schema";
-
-// type TaskType = {
-//   id: string;
-//   title: string;
-//   priority?: "low" | "medium" | "high";
-//   content: string;
-//   cardId: UniqueIdentifier;
-//   createdAt: string;
-//   dueDate: string;
-// };
-
-// type CardType = {
-//   id: string;
-//   title: string;
-//   content: string;
-// };
-
-// const DEFAULT_CARDS: CardType[] = [
-//   { id: "ready", title: "Ready", content: "This is ready to be picked up" },
-//   { id: "in-progress", title: "In Progress", content: "This is in progress" },
-//   { id: "in-review", title: "In Review", content: "This is in review" },
-//   { id: "done", title: "Done", content: "This is done" },
-// ];
-
-// const TASKS: TaskType[] = [
-//   {
-//     id: "task-1",
-//     title: "Do the homework",
-//     content: "This is task 1",
-//     cardId: "ready",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-2",
-//     title: "Wash the car",
-//     priority: "high",
-//     content: "This is task 2",
-//     cardId: "in-progress",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-3",
-//     title: "Buy groceries",
-//     content: "This is task 3",
-//     cardId: "in-review",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-4",
-//     title: "Clean the house",
-//     content: "This is task 4",
-//     cardId: "done",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-//   {
-//     id: "task-5",
-//     title: "Clean the room",
-//     content: "This is task 5",
-//     cardId: "done",
-//     createdAt: new Date().toLocaleDateString(),
-//     dueDate: new Date().toLocaleDateString(),
-//   },
-// ];
+import { AddTaskDialog } from "./add-task.dialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchTasksByProjectId } from "../_actions/fetch-tasks.action";
+import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SettingsDropdown } from "./settings-dropdown";
 
 type KanbanBoardProps = {
-  tasks?: Tasks[];
   cards?: SelectCards[] | null;
   project: Projects;
 };
 
-export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
-  // const [state, setState] = useState<{ tasks: TaskType[]; cards: CardType[] }>(
-  //   () => ({
-  //     tasks: TASKS,
-  //     cards: DEFAULT_CARDS,
-  //   }),
-  // );
-
+export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Tasks | null>(null);
+  const [localTasks, setLocalTasks] = useState<Tasks[]>([]);
+  const queryClient = useQueryClient();
+  const [isDragging, setIsDragging] = useState(false);
 
-  // const tasksByCard = React.useMemo(() => {
-  //   return state.tasks.reduce<Record<string, Tasks[]>>((acc, task) => {
-  //     const cardId = task.cardId as string;
-  //     if (!acc[cardId]) {
-  //       acc[cardId] = [];
-  //     }
-  //     acc[cardId].push(task);
-  //     return acc;
-  //   }, {});
-  // }, [state]);
+  const { data, isLoading } = useQuery({
+    queryKey: ["tasks", project.id],
+    queryFn: async () => {
+      const response = await fetchTasksByProjectId(project.id);
+      return response || [];
+    },
+  });
+
+  useEffect(() => {
+    if (data && Array.isArray(data)) {
+      setLocalTasks(data);
+    }
+  }, [data]);
+
+  const mutation = useMutation({
+    mutationFn: (variables: { taskId: string; newCardId: string }) =>
+      toggleTaskStateAction(variables),
+
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks", project.id] });
+
+      // Rollback
+      const previousTasks = [...localTasks];
+
+      setLocalTasks((prev) =>
+        prev.map((task) =>
+          task.id === newData.taskId
+            ? { ...task, cardId: newData.newCardId }
+            : task,
+        ),
+      );
+
+      return { previousTasks };
+    },
+    onError: (err, newData, context) => {
+      if (context?.previousTasks) {
+        setLocalTasks(context.previousTasks);
+      }
+      toast.error(err.message || "Error moving task");
+    },
+    onSuccess: () => {
+      toast.success("Task moved successfully");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", project.id] });
+    },
+  });
 
   function handleDragStart(event: DragStartEvent) {
+    setIsDragging(true);
     const taskId = event.active.id as string;
-    const task = tasks?.find((t) => t.id === taskId);
+    const task = localTasks.find((t) => t.id === taskId) || null;
     if (task) setActiveTask(task);
   }
 
+  // Sensors (custom sensor which i found on github issue for propagation prevention)
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+  );
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const taskId = active.id as string;
-      const updatedState = tasks?.map((task) =>
-        task.id === taskId ? { ...task, cardId: over.id } : task,
-      );
-      // Update tasks
-      // setState({ ...state, tasks: updatedState });
+    if (!over) return;
+
+    const taskId = active.id as string;
+    const targetCardId = over.id as string;
+    const task = localTasks.find((t) => t.id === taskId);
+
+    if (task && task.cardId === targetCardId) {
+      setIsDragging(false);
+      setActiveTask(null);
+      return;
     }
-    setActiveTask(null);
+
+    setLocalTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, cardId: targetCardId } : t)),
+    );
+
+    if (activeTask && activeTask.id === taskId) {
+      setActiveTask({ ...activeTask, cardId: targetCardId });
+    }
+
+    mutation.mutate({ taskId, newCardId: targetCardId });
+
+    // Set isDragging to false after a short delay to allow the animation to complete
+    setTimeout(() => {
+      setIsDragging(false);
+      setActiveTask(null);
+    }, 50);
   }
 
   // function handleAddNewCard() {
@@ -152,18 +149,30 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
         + Add Card
       </Button>
 
-      {/* <div
-        className="flex flex-col gap-4 overflow-x-scroll md:flex-row"
-        // style={{ scrollPadding: "1rem" }}
-      > */}
       <ScrollArea>
         <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
-          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            data-no-dnd="true"
+          >
             {cards?.map((card) => (
               <Card key={card.id} className="m-0 overflow-hidden p-0">
                 <Droppable
                   id={card.id}
-                  className="flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80"
+                  className={cn(
+                    "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
+                    {
+                      "ring-2 ring-offset-2": isDragging,
+                      "ring-blue-500": isDragging && card.id.includes("ready"),
+                      "ring-amber-500":
+                        isDragging && card.id.includes("in-progress"),
+                      "ring-purple-500":
+                        isDragging && card.id.includes("in-review"),
+                      "ring-green-500": isDragging && card.id.includes("done"),
+                    },
+                  )}
                 >
                   <div className="h-1/5">
                     <div className="flex items-center justify-between">
@@ -183,34 +192,54 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
                     <p className="text-muted-foreground text-sm">
                       {card.description}
                     </p>
-                    <Button className="mt-2 w-full" variant="outline">
-                      + Add Task
-                    </Button>
+                    <AddTaskDialog
+                      cardId={card.id}
+                      projectId={card.projectId}
+                    />
                   </div>
 
-                  <ScrollArea className="mt-2 flex h-4/5 w-full flex-col gap-2">
-                    {tasks
-                      ?.filter((task) => task.cardId === card.id)
-                      .map((task) => (
+                  <ScrollArea className="flex h-4/5 w-full flex-col">
+                    {isLoading &&
+                      Array.from({ length: 5 }).map((el, id) => (
+                        <Skeleton
+                          key={id}
+                          className="mt-2 h-18 w-full first:mt-0"
+                        />
+                      ))}
+
+                    {localTasks
+                      .filter((task: Tasks) => task.cardId === card.id)
+                      .map((task: Tasks) => (
                         <Draggable
                           key={task.id}
                           id={task.id}
                           className={cn(
-                            "bg-muted/60 relative z-50 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
+                            "bg-muted/60 relative z-50 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
                             {
-                              "border-blue-500": card.id === "ready",
-                              "border-amber-500": card.id === "in-progress",
-                              "border-purple-500": card.id === "in-review",
-                              "border-green-500": card.id === "done",
+                              "border-blue-500": card.id.includes("ready"),
+                              "border-amber-500":
+                                card.id.includes("in-progress"),
+                              "border-purple-500":
+                                card.id.includes("in-review"),
+                              "border-green-500": card.id.includes("done"),
                             },
+                            activeTask?.id === task.id
+                              ? "opacity-0"
+                              : "opacity-100",
                           )}
                         >
-                          <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                            {task.description}
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                              DEFAULT DESCRIPTION
+                            </p>
+                            <SettingsDropdown taskId={task.id} />
+                          </div>
+
                           <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
                             <div>
-                              <span className="truncate">{task.title} </span>
+                              <span className="inline-block w-40 truncate">
+                                {task.title}{" "}
+                              </span>
                               {task.priority === "high" && (
                                 <span className="animate-jumping inline-block font-bold text-red-600">
                                   !
@@ -230,11 +259,35 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
               </Card>
             ))}
 
-            <DragOverlay>
-              {activeTask ? (
-                <div className="bg-muted/90 rounded-lg border p-3 shadow-lg">
+            <DragOverlay
+              dropAnimation={{
+                duration: 0, // Disabled immediate
+              }}
+              className="relative z-10"
+            >
+              {activeTask && isDragging ? (
+                <div
+                  className={cn(
+                    "bg-muted/90 scale-105 transform rounded-lg border p-3 shadow-lg",
+                    {
+                      "border-blue-500 ring-1 ring-blue-300":
+                        activeTask.cardId.includes("ready"),
+                      "border-amber-500 ring-1 ring-amber-300":
+                        activeTask.cardId.includes("in-progress"),
+                      "border-purple-500 ring-1 ring-purple-300":
+                        activeTask.cardId.includes("in-review"),
+                      "border-green-500 ring-1 ring-green-300":
+                        activeTask.cardId.includes("done"),
+                    },
+                  )}
+                  style={{
+                    // Add transition for smooth color changes
+                    transition:
+                      "border-color 0.15s ease, box-shadow 0.15s ease",
+                  }}
+                >
                   <p className="text-foreground/80 text-sm">
-                    {activeTask.description}
+                    DEFAULT DESCRIPTION ACTIVE TASK
                   </p>
                   <div className="mt-2 font-semibold">{activeTask.title}</div>
                 </div>
@@ -245,6 +298,5 @@ export function KanbanBoard({ tasks, cards, project }: KanbanBoardProps) {
         </div>
       </ScrollArea>
     </div>
-    // </div>
   );
 }

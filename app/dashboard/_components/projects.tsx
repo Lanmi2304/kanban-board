@@ -10,7 +10,7 @@ export function Projects({ projects }: { projects: Projects[] }) {
 
   console.log(projects);
   return (
-    <div className="grid w-2/3 gap-4">
+    <div className="grid w-full gap-4">
       {projects.filter((project) =>
         project.title.toLowerCase().includes(search),
       ).length === 0 && (
