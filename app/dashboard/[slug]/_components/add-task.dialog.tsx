@@ -123,7 +123,7 @@ export function AddTaskDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 sm:max-w-md"
+            className="max-w-[348px] space-y-4 sm:max-w-md"
           >
             <FormField
               control={form.control}
