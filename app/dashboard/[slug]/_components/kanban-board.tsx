@@ -10,7 +10,10 @@ import {
 } from "@dnd-kit/core";
 import { Droppable } from "../../_components/droppable";
 import { Draggable } from "../../_components/draggable";
-import { MouseSensor } from "../../_components/smart-pointer-sensor";
+import {
+  MouseSensor,
+  TouchSensor,
+} from "../../_components/smart-pointer-sensor";
 import { cn } from "@/lib/utils/cn";
 import { Calendar, Ellipsis, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -94,6 +97,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   // Sensors (custom sensor which i found on github issue for propagation prevention)
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor),
   );
 
   function handleDragEnd(event: DragEndEvent) {
