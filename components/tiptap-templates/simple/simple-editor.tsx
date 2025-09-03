@@ -1,12 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  EditorContent,
-  EditorContext,
-  PureEditorContent,
-  useEditor,
-} from "@tiptap/react";
+import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
@@ -66,7 +61,7 @@ import { LinkIcon } from "@/components/tiptap-icons/link-icon";
 
 // --- Hooks ---
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useWindowSize } from "@/hooks/use-window-size";
+// import { useWindowSize } from "@/hooks/use-window-size"; // removed unused
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 
 // --- Lib ---
@@ -76,7 +71,7 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import "@/components/tiptap-templates/simple/simple-editor.scss";
 import { EditorContent as ContentType } from "@/app/dashboard/[slug]/_components/add-task.dialog";
 
-import content from "@/components/tiptap-templates/simple/data/content.json";
+// import content from "@/components/tiptap-templates/simple/data/content.json"; // demo content removed
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -88,7 +83,7 @@ const MainToolbarContent = ({
   isMobile: boolean;
 }) => {
   return (
-    <>
+    <div className="absolute flex w-full items-center overflow-auto">
       <Spacer />
 
       <ToolbarGroup>
@@ -149,7 +144,7 @@ const MainToolbarContent = ({
       <Spacer />
 
       {isMobile && <ToolbarSeparator />}
-    </>
+    </div>
   );
 };
 
@@ -184,11 +179,15 @@ const MobileToolbarContent = ({
 
 export function SimpleEditor({
   setContent,
+  toolbarVariant = "fixed",
 }: {
   setContent: React.Dispatch<React.SetStateAction<ContentType | undefined>>;
+  fullWidth?: boolean;
+  className?: string;
+  toolbarVariant?: "fixed" | "floating";
 }) {
   const isMobile = useIsMobile();
-  const { height } = useWindowSize();
+  // const { height } = useWindowSize(); // height currently unused
   const [mobileView, setMobileView] = React.useState<
     "main" | "highlighter" | "link"
   >("main");
@@ -235,7 +234,7 @@ export function SimpleEditor({
     content: "",
   });
 
-  const rect = useCursorVisibility({
+  useCursorVisibility({
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
   });
@@ -261,25 +260,27 @@ export function SimpleEditor({
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        <Toolbar ref={toolbarRef}>
-          {mobileView === "main" ? (
-            <MainToolbarContent
-              onHighlighterClick={() => setMobileView("highlighter")}
-              onLinkClick={() => setMobileView("link")}
-              isMobile={isMobile}
-            />
-          ) : (
-            <MobileToolbarContent
-              type={mobileView === "highlighter" ? "highlighter" : "link"}
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
+        <div className="w-[100%] overflow-hidden">
+          <Toolbar ref={toolbarRef} variant={toolbarVariant}>
+            {mobileView === "main" ? (
+              <MainToolbarContent
+                onHighlighterClick={() => setMobileView("highlighter")}
+                onLinkClick={() => setMobileView("link")}
+                isMobile={isMobile}
+              />
+            ) : (
+              <MobileToolbarContent
+                type={mobileView === "highlighter" ? "highlighter" : "link"}
+                onBack={() => setMobileView("main")}
+              />
+            )}
+          </Toolbar>
+        </div>
 
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content w-full rounded-xl rounded-t-none border"
+          className="simple-editor-content w-full max-w-full min-w-0 rounded-xl rounded-t-none border pt-4"
         />
       </EditorContext.Provider>
     </div>
