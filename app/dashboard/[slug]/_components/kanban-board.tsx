@@ -5,9 +5,12 @@ import {
   DragEndEvent,
   DragStartEvent,
   DragOverlay,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import { Droppable } from "../../_components/droppable";
 import { Draggable } from "../../_components/draggable";
+import { MouseSensor } from "../../_components/smart-pointer-sensor";
 import { cn } from "@/lib/utils/cn";
 import { Calendar, Ellipsis, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,7 @@ import { fetchTasksByProjectId } from "../_actions/fetch-tasks.action";
 import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SettingsDropdown } from "./settings-dropdown";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -87,6 +91,11 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
     if (task) setActiveTask(task);
   }
 
+  // Sensors (custom sensor which i found on github issue for propagation prevention)
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+  );
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
@@ -142,7 +151,12 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
 
       <ScrollArea>
         <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
-          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            data-no-dnd="true"
+          >
             {cards?.map((card) => (
               <Card key={card.id} className="m-0 overflow-hidden p-0">
                 <Droppable
@@ -214,9 +228,13 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                               : "opacity-100",
                           )}
                         >
-                          <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                            DEFAULT DESCRIPTION
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                              DEFAULT DESCRIPTION
+                            </p>
+                            <SettingsDropdown taskId={task.id} />
+                          </div>
+
                           <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
                             <div>
                               <span className="inline-block w-40 truncate">
@@ -245,6 +263,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
               dropAnimation={{
                 duration: 0, // Disabled immediate
               }}
+              className="relative z-10"
             >
               {activeTask && isDragging ? (
                 <div
