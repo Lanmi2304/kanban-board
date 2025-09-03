@@ -1,9 +1,13 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { getSession } from "@/lib/utils/get-session";
 import x from "@/public/kanban-method-animate.svg";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getSession();
+
   return (
     <div className="relative my-10 flex w-full flex-col-reverse items-center justify-start md:mt-0 md:flex-row md:justify-center">
       <div className="relative -top-10 flex w-full flex-col gap-4 text-center font-medium md:top-0 md:w-1/3 md:text-left">
@@ -16,23 +20,43 @@ export default function Home() {
           Manage your tasks efficiently with our Kanban Board. Create, organize,
           and track your projects seamlessly.
         </p>
-        <div className="flex w-full items-center justify-center gap-4 md:justify-start">
-          <Button className="cursor-pointer" size="lg" asChild>
-            <Link href="/sign-in">
-              <span>Sign In</span>
-            </Link>
-          </Button>
-          <Button
-            variant="secondary"
-            className="cursor-pointer"
-            size="lg"
-            asChild
-          >
-            <Link href="/sign-up">
-              <span>Sign Up</span>
-            </Link>
-          </Button>
-        </div>
+
+        {session?.user ? (
+          <div className="flex w-full items-center justify-center gap-4 md:justify-start">
+            <Button
+              className="cursor-pointer"
+              size="lg"
+              variant="outline"
+              asChild
+            >
+              <Link href="/dashboard" className="flex justify-between">
+                <Avatar>
+                  <AvatarImage src={session.user.image || "placeholder"} />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+                <span>Go to Dashboard</span>
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="flex w-full items-center justify-center gap-4 md:justify-start">
+            <Button className="cursor-pointer" size="lg" asChild>
+              <Link href="/sign-in">
+                <span>Sign In</span>
+              </Link>
+            </Button>
+            <Button
+              variant="secondary"
+              className="cursor-pointer"
+              size="lg"
+              asChild
+            >
+              <Link href="/sign-up">
+                <span>Sign Up</span>
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Image */}

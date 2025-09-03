@@ -29,7 +29,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar user={data.user} />
       <SidebarInset className="mb-10 w-fit overflow-x-hidden">
         <header className="bg-background fixed top-0 z-20 flex h-16 w-full shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
