@@ -227,9 +227,6 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                                 card.id.includes("in-review"),
                               "border-green-500": card.id.includes("done"),
                             },
-                            activeTask?.id === task.id
-                              ? "opacity-0"
-                              : "opacity-100",
                           )}
                         >
                           <div className="flex items-center justify-between">
