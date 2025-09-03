@@ -15,7 +15,7 @@ export async function addTask({
     title,
     cardId,
     dueDate: new Date(),
-    userId: userId || "",
+    userId: userId,
     content,
   });
 }

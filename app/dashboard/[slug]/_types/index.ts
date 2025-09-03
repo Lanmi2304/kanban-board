@@ -9,7 +9,7 @@ type TaskContent = {
 
 export type AddTaskPayload = {
   title: string;
-  userId?: string;
+  userId: string;
   cardId: string;
   projectId: string;
   content: TaskContent;

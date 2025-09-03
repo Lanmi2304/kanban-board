@@ -27,8 +27,7 @@ import { useForm } from "react-hook-form";
 import { AddTaskInput, addTaskSchema } from "../_schemas/add-task.schema";
 import { toast } from "sonner";
 import { addTaskAction } from "../_actions/add-task.action";
-import { addTaskService } from "../_services/add-task.service";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export type ContentNode = {
   type: string;
@@ -61,17 +60,6 @@ export function AddTaskDialog({
     },
   });
   const queryClient = useQueryClient();
-
-  useQuery({
-    queryKey: ["tasks"],
-    queryFn: () =>
-      addTaskService({
-        title: form.getValues("title"),
-        cardId,
-        projectId,
-        content: content!,
-      }),
-  });
 
   const mutation = useMutation({
     mutationFn: async (newTodo: AddTaskInput) => {
