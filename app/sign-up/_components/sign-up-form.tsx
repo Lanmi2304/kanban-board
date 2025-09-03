@@ -24,7 +24,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { is } from "drizzle-orm";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function SignUpForm() {
   const [image, setImage] = useState<File | null>(null);
@@ -38,6 +39,7 @@ export function SignUpForm() {
       confirmPassword: "",
     },
   });
+  const router = useRouter();
 
   const [isSubmitting, startTransition] = useTransition();
 
@@ -53,16 +55,15 @@ export function SignUpForm() {
     }
   };
 
-  // 2. Define a submit handler.
   async function onSubmit(values: SignUpSchemaInput) {
     startTransition(async () => {
       const imageFile = image ? await convertImageToBase64(image) : "";
       try {
         const response = await signUpAction({ ...values, image: imageFile });
-        // Toast or notification can be added here to inform the user of success
+        router.push("/dashboard");
         console.log("Sign up successful:", response);
       } catch (error) {
-        // Toast or notification can be added here to inform the user of failure
+        toast.error("Error during sign up");
         console.error("Error during sign up:", error);
       }
     });

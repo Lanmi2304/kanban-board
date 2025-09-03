@@ -11,22 +11,17 @@ import {
 } from "@/components/ui/sidebar";
 import { DatePicker } from "./date-picker";
 import { NavUser } from "./nav-user";
+import { User } from "better-auth";
 
-// This is sample data.
-const data = {
-  user: {
-    name: "Milan",
-    email: "m@example.com",
-    avatar:
-      "https://lh3.googleusercontent.com/a/ACg8ocKKtr8ET0d4ibeTyw8bzsrjyRhYkx3Sc78TiZZFpxED8w93sLkSsA=s192-c-mo",
-  },
-};
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: User;
+}
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-sidebar-border h-16 border-b">
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarHeader>
       <SidebarContent>
         <DatePicker />
