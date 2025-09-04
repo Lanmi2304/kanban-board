@@ -67,13 +67,13 @@ export function SettingsDropdown({ taskId }: { taskId: string }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={openAlert} onOpenChange={alertToggleHandler}>
+      <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your task data from our servers.
+              This action cannot be undone. This will permanently delete this
+              task and remove its data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
