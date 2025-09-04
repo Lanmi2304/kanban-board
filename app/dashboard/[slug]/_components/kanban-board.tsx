@@ -27,6 +27,7 @@ import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsDropdown } from "./settings-dropdown";
+import { DisplayTaskDetails } from "./display-task-details.dialog";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -36,6 +37,7 @@ type KanbanBoardProps = {
 export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Tasks | null>(null);
   const [localTasks, setLocalTasks] = useState<Tasks[]>([]);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
 
@@ -144,166 +146,193 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   // }
 
   return (
-    <div className="flex w-full flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{project.title}</h1>
-        <Button className="w-fit cursor-pointer" variant="outline">
-          <Settings />
+    <>
+      <div className="flex w-full flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">{project.title}</h1>
+          <Button className="w-fit cursor-pointer" variant="outline">
+            <Settings />
+          </Button>
+        </div>
+
+        <Button onClick={() => console.log("Add card")} className="w-fit">
+          + Add Card
         </Button>
+
+        <ScrollArea>
+          <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              data-no-dnd="true"
+            >
+              {cards?.map((card) => (
+                <Card key={card.id} className="m-0 overflow-hidden p-0">
+                  <Droppable
+                    id={card.id}
+                    className={cn(
+                      "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
+                      {
+                        "ring-2 ring-offset-2": isDragging,
+                        "ring-blue-500":
+                          isDragging && card.id.includes("ready"),
+                        "ring-amber-500":
+                          isDragging && card.id.includes("in-progress"),
+                        "ring-purple-500":
+                          isDragging && card.id.includes("in-review"),
+                        "ring-green-500":
+                          isDragging && card.id.includes("done"),
+                      },
+                    )}
+                  >
+                    <div className="h-1/5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={cn("size-4 rounded-full ring-2", {
+                              "ring-blue-500": card.id.includes("ready"),
+                              "ring-amber-500": card.id.includes("in-progress"),
+                              "ring-purple-500": card.id.includes("in-review"),
+                              "ring-green-500": card.id.includes("done"),
+                            })}
+                          ></div>
+                          <h1 className="font-semibold">{card.title}</h1>
+                        </div>
+                        <Ellipsis className="text-primary" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">
+                        {card.description}
+                      </p>
+                      <AddTaskDialog
+                        cardId={card.id}
+                        projectId={card.projectId}
+                      />
+                    </div>
+
+                    <ScrollArea className="flex h-4/5 w-full flex-col">
+                      {isLoading &&
+                        Array.from({ length: 5 }).map((el, id) => (
+                          <Skeleton
+                            key={id}
+                            className="mt-2 h-18 w-full first:mt-0"
+                          />
+                        ))}
+
+                      {localTasks
+                        .filter((task: Tasks) => task.cardId === card.id)
+                        .map((task: Tasks) => (
+                          <div
+                            key={task.id}
+                            className="mt-2 first:mt-0"
+                            onTouchStart={() => {
+                              setActiveTask(task);
+                              setIsDetailsOpen(true);
+                            }}
+                            // Idk why but this fixed the problem on the mobile phone..
+                            onTouchEnd={() => {
+                              setActiveTask(task);
+                              setIsDetailsOpen(true);
+                            }}
+                            onClick={() => {
+                              setActiveTask(task);
+                              setIsDetailsOpen(true);
+                            }}
+                          >
+                            <Draggable
+                              id={task.id}
+                              className={cn(
+                                "bg-muted/60 relative z-10 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
+                                {
+                                  "border-blue-500": card.id.includes("ready"),
+                                  "border-amber-500":
+                                    card.id.includes("in-progress"),
+                                  "border-purple-500":
+                                    card.id.includes("in-review"),
+                                  "border-green-500": card.id.includes("done"),
+                                },
+                                activeTask?.id === task.id && isDragging
+                                  ? "opacity-0"
+                                  : "opacity-100",
+                              )}
+                            >
+                              <div className="flex items-center justify-between">
+                                <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
+                                  DEFAULT DESCRIPTION
+                                </p>
+                                <SettingsDropdown taskId={task.id} />
+                              </div>
+
+                              <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
+                                <div>
+                                  <span className="inline-block w-40 truncate">
+                                    {task.title}{" "}
+                                  </span>
+                                  {task.priority === "high" && (
+                                    <span className="animate-jumping inline-block font-bold text-red-600">
+                                      !
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                                  <Calendar className="size-4" />{" "}
+                                  {task.dueDate.toLocaleDateString()}
+                                </span>
+                              </div>
+                            </Draggable>
+                          </div>
+                        ))}
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </Droppable>
+                </Card>
+              ))}
+
+              <DragOverlay
+                dropAnimation={{
+                  duration: 0, // Disabled immediate
+                }}
+                className="relative z-10"
+              >
+                {activeTask && isDragging ? (
+                  <div
+                    className={cn(
+                      "bg-muted/90 scale-105 transform rounded-lg border p-3 shadow-lg",
+                      {
+                        "border-blue-500 ring-1 ring-blue-300":
+                          activeTask.cardId.includes("ready"),
+                        "border-amber-500 ring-1 ring-amber-300":
+                          activeTask.cardId.includes("in-progress"),
+                        "border-purple-500 ring-1 ring-purple-300":
+                          activeTask.cardId.includes("in-review"),
+                        "border-green-500 ring-1 ring-green-300":
+                          activeTask.cardId.includes("done"),
+                      },
+                    )}
+                    style={{
+                      // Add transition for smooth color changes
+                      transition:
+                        "border-color 0.15s ease, box-shadow 0.15s ease",
+                    }}
+                  >
+                    <p className="text-foreground/80 text-sm">
+                      DEFAULT DESCRIPTION ACTIVE TASK
+                    </p>
+                    <div className="mt-2 font-semibold">{activeTask.title}</div>
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+            <ScrollBar orientation="horizontal" />
+          </div>
+        </ScrollArea>
       </div>
 
-      <Button onClick={() => console.log("Add card")} className="w-fit">
-        + Add Card
-      </Button>
-
-      <ScrollArea>
-        <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
-          <DndContext
-            sensors={sensors}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            data-no-dnd="true"
-          >
-            {cards?.map((card) => (
-              <Card key={card.id} className="m-0 overflow-hidden p-0">
-                <Droppable
-                  id={card.id}
-                  className={cn(
-                    "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
-                    {
-                      "ring-2 ring-offset-2": isDragging,
-                      "ring-blue-500": isDragging && card.id.includes("ready"),
-                      "ring-amber-500":
-                        isDragging && card.id.includes("in-progress"),
-                      "ring-purple-500":
-                        isDragging && card.id.includes("in-review"),
-                      "ring-green-500": isDragging && card.id.includes("done"),
-                    },
-                  )}
-                >
-                  <div className="h-1/5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={cn("size-4 rounded-full ring-2", {
-                            "ring-blue-500": card.id.includes("ready"),
-                            "ring-amber-500": card.id.includes("in-progress"),
-                            "ring-purple-500": card.id.includes("in-review"),
-                            "ring-green-500": card.id.includes("done"),
-                          })}
-                        ></div>
-                        <h1 className="font-semibold">{card.title}</h1>
-                      </div>
-                      <Ellipsis className="text-primary" />
-                    </div>
-                    <p className="text-muted-foreground text-sm">
-                      {card.description}
-                    </p>
-                    <AddTaskDialog
-                      cardId={card.id}
-                      projectId={card.projectId}
-                    />
-                  </div>
-
-                  <ScrollArea className="flex h-4/5 w-full flex-col">
-                    {isLoading &&
-                      Array.from({ length: 5 }).map((el, id) => (
-                        <Skeleton
-                          key={id}
-                          className="mt-2 h-18 w-full first:mt-0"
-                        />
-                      ))}
-
-                    {localTasks
-                      .filter((task: Tasks) => task.cardId === card.id)
-                      .map((task: Tasks) => (
-                        <Draggable
-                          key={task.id}
-                          id={task.id}
-                          className={cn(
-                            "bg-muted/60 relative z-10 mt-2 w-full cursor-pointer rounded-lg border p-2 first:mt-0 focus:cursor-grab",
-                            {
-                              "border-blue-500": card.id.includes("ready"),
-                              "border-amber-500":
-                                card.id.includes("in-progress"),
-                              "border-purple-500":
-                                card.id.includes("in-review"),
-                              "border-green-500": card.id.includes("done"),
-                            },
-                            activeTask?.id === task.id && isDragging
-                              ? "opacity-0"
-                              : "opacity-100",
-                          )}
-                        >
-                          <div className="flex items-center justify-between">
-                            <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                              DEFAULT DESCRIPTION
-                            </p>
-                            <SettingsDropdown taskId={task.id} />
-                          </div>
-
-                          <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
-                            <div>
-                              <span className="inline-block w-40 truncate">
-                                {task.title}{" "}
-                              </span>
-                              {task.priority === "high" && (
-                                <span className="animate-jumping inline-block font-bold text-red-600">
-                                  !
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                              <Calendar className="size-4" />{" "}
-                              {task.dueDate.toLocaleDateString()}
-                            </span>
-                          </div>
-                        </Draggable>
-                      ))}
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </Droppable>
-              </Card>
-            ))}
-
-            <DragOverlay
-              dropAnimation={{
-                duration: 0, // Disabled immediate
-              }}
-              className="relative z-10"
-            >
-              {activeTask && isDragging ? (
-                <div
-                  className={cn(
-                    "bg-muted/90 scale-105 transform rounded-lg border p-3 shadow-lg",
-                    {
-                      "border-blue-500 ring-1 ring-blue-300":
-                        activeTask.cardId.includes("ready"),
-                      "border-amber-500 ring-1 ring-amber-300":
-                        activeTask.cardId.includes("in-progress"),
-                      "border-purple-500 ring-1 ring-purple-300":
-                        activeTask.cardId.includes("in-review"),
-                      "border-green-500 ring-1 ring-green-300":
-                        activeTask.cardId.includes("done"),
-                    },
-                  )}
-                  style={{
-                    // Add transition for smooth color changes
-                    transition:
-                      "border-color 0.15s ease, box-shadow 0.15s ease",
-                  }}
-                >
-                  <p className="text-foreground/80 text-sm">
-                    DEFAULT DESCRIPTION ACTIVE TASK
-                  </p>
-                  <div className="mt-2 font-semibold">{activeTask.title}</div>
-                </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-          <ScrollBar orientation="horizontal" />
-        </div>
-      </ScrollArea>
-    </div>
+      <DisplayTaskDetails
+        task={activeTask}
+        isOpen={isDetailsOpen}
+        setIsOpen={setIsDetailsOpen}
+      />
+    </>
   );
 }

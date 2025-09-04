@@ -178,9 +178,11 @@ const MobileToolbarContent = ({
 );
 
 export function SimpleEditor({
+  content,
   setContent,
   toolbarVariant = "fixed",
 }: {
+  content?: ContentType;
   setContent: React.Dispatch<React.SetStateAction<ContentType | undefined>>;
   fullWidth?: boolean;
   className?: string;
@@ -231,7 +233,7 @@ export function SimpleEditor({
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content: "",
+    content: content ? content : undefined,
   });
 
   useCursorVisibility({
