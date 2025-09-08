@@ -11,7 +11,6 @@ import {
 import { Tasks } from "@/server/db/schema";
 import { EditorContent } from "./add-task.dialog";
 import { useState, useMemo, useEffect } from "react";
-
 import { generateHTML } from "@tiptap/html";
 import { Image as TipTapImage } from "@tiptap/extension-image";
 import { HardBreak } from "@tiptap/extension-hard-break";
@@ -30,7 +29,7 @@ import Text from "@tiptap/extension-text";
 import Bold from "@tiptap/extension-bold";
 import Heading from "@tiptap/extension-heading";
 import Italic from "@tiptap/extension-italic";
-import CodeBlock from "@tiptap/extension-code-block";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Code from "@tiptap/extension-code";
 import Strike from "@tiptap/extension-strike";
 import BlockQuote from "@tiptap/extension-blockquote";
@@ -38,7 +37,13 @@ import ListItem from "@tiptap/extension-list-item";
 import BulletList from "@tiptap/extension-bullet-list";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { JSONContent } from "@tiptap/core";
-import { SafeHtmlRenderer } from "./safe-html-renderer";
+import { all, createLowlight } from "lowlight";
+import css from "highlight.js/lib/languages/css";
+import js from "highlight.js/lib/languages/javascript";
+import ts from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml";
+
+import { OrderedList } from "@tiptap/extension-list";
 
 type DisplayTaskDetailsProps = {
   isOpen: boolean;
@@ -52,7 +57,12 @@ export function DisplayTaskDetails({
   task,
 }: DisplayTaskDetailsProps) {
   const [content, setContent] = useState<EditorContent | undefined>();
-  const [isEditing, setIsEditing] = useState(false);
+
+  const lowlight = createLowlight(all);
+  lowlight.register("html", html);
+  lowlight.register("css", css);
+  lowlight.register("js", js);
+  lowlight.register("ts", ts);
 
   // Central list of extensions (avoid recreating arrays on each render)
   const extensions = useMemo(
@@ -64,7 +74,10 @@ export function DisplayTaskDetails({
       Heading,
       Italic,
       Highlight,
-      CodeBlock,
+      CodeBlockLowlight.configure({
+        lowlight,
+        // defaultLanguage: "javascript",
+      }),
       Code,
       BlockQuote,
       Strike,
@@ -81,12 +94,13 @@ export function DisplayTaskDetails({
       TaskItem,
       TaskList,
       Link,
+      OrderedList,
     ],
-    [],
+    [lowlight],
   );
 
   // Normalize any stored JSON into a proper doc node
-  const raw = (isEditing ? content : (task?.content as unknown)) as unknown;
+  const raw = (content ?? (task?.content as unknown)) as unknown;
 
   function ensureDoc(json: unknown): JSONContent | null {
     if (!json || typeof json !== "object") return null;
@@ -100,49 +114,36 @@ export function DisplayTaskDetails({
 
   const normalized = useMemo(() => ensureDoc(raw), [raw]);
 
-  const html = useMemo(() => {
-    if (!normalized) return "";
-    try {
-      return generateHTML(normalized, extensions);
-    } catch (e) {
-      console.error("Failed to generate HTML from editor JSON:", e);
-      return "";
-    }
-  }, [normalized, extensions]);
+  // const html = useMemo(() => {
+  //   if (!normalized) return "";
+  //   try {
+  //     return generateHTML(normalized, extensions);
+  //   } catch (e) {
+  //     console.error("Failed to generate HTML from editor JSON:", e);
+  //     return "";
+  //   }
+  // }, [normalized, extensions]);
 
   useEffect(() => {
-    if (!content && normalized && !isEditing) {
+    if (!content && normalized) {
       setContent(normalized as unknown as EditorContent);
     }
-  }, [normalized, content, isEditing]);
+  }, [normalized, content]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className="flex w-full max-w-3xl! flex-col">
         <DialogHeader>
           <DialogTitle>{task?.title ?? "Task"}</DialogTitle>
           <DialogDescription>
             Detailed view of the task. You can edit the content below.
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {!isEditing && (
-            <div className="prose pointer-events-none w-full max-w-none">
-              {html ? (
-                <SafeHtmlRenderer html={html} />
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  No content available.
-                </p>
-              )}
-            </div>
-          )}
-          {isEditing && (
-            <SimpleEditor
-              content={normalized as EditorContent | undefined}
-              setContent={setContent}
-            />
-          )}
+        <div className="relative mt-4 h-fit w-full space-y-4">
+          <SimpleEditor
+            content={normalized as EditorContent | undefined}
+            setContent={setContent}
+          />
         </div>
       </DialogContent>
     </Dialog>

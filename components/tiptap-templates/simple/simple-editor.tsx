@@ -282,7 +282,7 @@ export function SimpleEditor({
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content w-full max-w-full min-w-0 rounded-xl rounded-t-none border pt-4"
+          className="simple-editor-content mx-0 h-full w-full max-w-full rounded-xl rounded-t-none border pt-4"
         />
       </EditorContext.Provider>
     </div>

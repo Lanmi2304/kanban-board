@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsDropdown } from "./settings-dropdown";
 import { DisplayTaskDetails } from "./display-task-details.dialog";
+import { el } from "date-fns/locale";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -172,7 +173,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                   <Droppable
                     id={card.id}
                     className={cn(
-                      "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-y-visible rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
+                      "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-x-hidden rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
                       {
                         "ring-2 ring-offset-2": isDragging,
                         "ring-blue-500":
@@ -282,7 +283,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                             </Draggable>
                           </div>
                         ))}
-                      <ScrollBar orientation="horizontal" />
+                      <ScrollBar orientation="vertical" />
                     </ScrollArea>
                   </Droppable>
                 </Card>
