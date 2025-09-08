@@ -145,6 +145,10 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   //   };
   //   setState({ ...state, cards: [...state.cards, newCard] });
   // }
+  const handleTaskClick = (task: Tasks) => {
+    setActiveTask(task);
+    setIsDetailsOpen(true);
+  };
 
   return (
     <>
@@ -227,17 +231,14 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                             key={task.id}
                             className="mt-2 first:mt-0"
                             onTouchStart={() => {
-                              setActiveTask(task);
-                              setIsDetailsOpen(true);
+                              handleTaskClick(task);
                             }}
                             // Idk why but this fixed the problem on the mobile phone..
                             onTouchEnd={() => {
-                              setActiveTask(task);
-                              setIsDetailsOpen(true);
+                              handleTaskClick(task);
                             }}
                             onClick={() => {
-                              setActiveTask(task);
-                              setIsDetailsOpen(true);
+                              handleTaskClick(task);
                             }}
                           >
                             <Draggable
