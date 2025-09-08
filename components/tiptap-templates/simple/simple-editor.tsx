@@ -71,6 +71,14 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import "@/components/tiptap-templates/simple/simple-editor.scss";
 import { EditorContent as ContentType } from "@/app/dashboard/[slug]/_components/add-task.dialog";
 
+// --- Lowlight ---
+import { all, createLowlight } from "lowlight";
+import css from "highlight.js/lib/languages/css";
+import js from "highlight.js/lib/languages/javascript";
+import ts from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+
 // import content from "@/components/tiptap-templates/simple/data/content.json"; // demo content removed
 
 const MainToolbarContent = ({
@@ -195,6 +203,15 @@ export function SimpleEditor({
   >("main");
   const toolbarRef = React.useRef<HTMLDivElement>(null);
 
+  const lowlight = React.useMemo(() => {
+    const highlighter = createLowlight(all);
+    highlighter.register("html", html);
+    highlighter.register("css", css);
+    highlighter.register("js", js);
+    highlighter.register("ts", ts);
+    return highlighter;
+  }, []);
+
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
@@ -216,6 +233,7 @@ export function SimpleEditor({
         },
       }),
       HorizontalRule,
+      CodeBlockLowlight.configure({ lowlight }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
@@ -262,7 +280,7 @@ export function SimpleEditor({
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        <div className="w-[100%] overflow-hidden">
+        <div className="w-full overflow-hidden">
           <Toolbar ref={toolbarRef} variant={toolbarVariant}>
             {mobileView === "main" ? (
               <MainToolbarContent
@@ -282,7 +300,7 @@ export function SimpleEditor({
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content mx-0 h-full w-full max-w-full rounded-xl rounded-t-none border pt-4"
+          className="simple-editor-content prose mx-0 h-full w-full max-w-full rounded-xl rounded-t-none border pt-4"
         />
       </EditorContext.Provider>
     </div>

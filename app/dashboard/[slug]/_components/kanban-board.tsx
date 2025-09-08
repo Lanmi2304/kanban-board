@@ -28,7 +28,6 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsDropdown } from "./settings-dropdown";
 import { DisplayTaskDetails } from "./display-task-details.dialog";
-import { el } from "date-fns/locale";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
