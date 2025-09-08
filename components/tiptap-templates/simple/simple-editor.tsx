@@ -71,6 +71,14 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import "@/components/tiptap-templates/simple/simple-editor.scss";
 import { EditorContent as ContentType } from "@/app/dashboard/[slug]/_components/add-task.dialog";
 
+// --- Lowlight ---
+import { all, createLowlight } from "lowlight";
+import css from "highlight.js/lib/languages/css";
+import js from "highlight.js/lib/languages/javascript";
+import ts from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+
 // import content from "@/components/tiptap-templates/simple/data/content.json"; // demo content removed
 
 const MainToolbarContent = ({
@@ -178,9 +186,11 @@ const MobileToolbarContent = ({
 );
 
 export function SimpleEditor({
+  content,
   setContent,
   toolbarVariant = "fixed",
 }: {
+  content?: ContentType;
   setContent: React.Dispatch<React.SetStateAction<ContentType | undefined>>;
   fullWidth?: boolean;
   className?: string;
@@ -192,6 +202,15 @@ export function SimpleEditor({
     "main" | "highlighter" | "link"
   >("main");
   const toolbarRef = React.useRef<HTMLDivElement>(null);
+
+  const lowlight = React.useMemo(() => {
+    const highlighter = createLowlight(all);
+    highlighter.register("html", html);
+    highlighter.register("css", css);
+    highlighter.register("js", js);
+    highlighter.register("ts", ts);
+    return highlighter;
+  }, []);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -214,6 +233,7 @@ export function SimpleEditor({
         },
       }),
       HorizontalRule,
+      CodeBlockLowlight.configure({ lowlight }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
@@ -231,7 +251,7 @@ export function SimpleEditor({
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content: "",
+    content: content ? content : undefined,
   });
 
   useCursorVisibility({
@@ -260,7 +280,7 @@ export function SimpleEditor({
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        <div className="w-[100%] overflow-hidden">
+        <div className="w-full overflow-hidden">
           <Toolbar ref={toolbarRef} variant={toolbarVariant}>
             {mobileView === "main" ? (
               <MainToolbarContent
@@ -280,7 +300,7 @@ export function SimpleEditor({
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content w-full max-w-full min-w-0 rounded-xl rounded-t-none border pt-4"
+          className="simple-editor-content prose mx-0 h-full w-full max-w-full rounded-xl rounded-t-none border pt-4"
         />
       </EditorContext.Provider>
     </div>

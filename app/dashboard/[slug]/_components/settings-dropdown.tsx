@@ -40,10 +40,6 @@ export function SettingsDropdown({ taskId }: { taskId: string }) {
     },
   });
 
-  const alertToggleHandler = (open: boolean) => {
-    setOpenAlert(open);
-  };
-
   const deleteHandler = () => {
     mutation.mutate(taskId);
   };
@@ -52,14 +48,22 @@ export function SettingsDropdown({ taskId }: { taskId: string }) {
     <>
       <DropdownMenu modal={false} data-no-dnd="true">
         <DropdownMenuTrigger className="cursor-pointer" asChild>
-          <Button variant="ghost" className="p-0">
+          <Button
+            variant="ghost"
+            className="p-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Ellipsis className="text-primary size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="relative z-50 flex flex-col gap-1">
           <DropdownMenuItem className="cursor-pointer">Edit</DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => setOpenAlert(true)}
+            onTouchStart={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              setOpenAlert(true);
+              e.stopPropagation();
+            }}
             className="hover:bg-destructive/90! bg-destructive cursor-pointer text-white hover:text-white!"
           >
             Delete
@@ -81,7 +85,11 @@ export function SettingsDropdown({ taskId }: { taskId: string }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={deleteHandler}
+              onTouchStart={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                deleteHandler();
+                e.stopPropagation();
+              }}
               className="cursor-pointer"
               asChild
             >
