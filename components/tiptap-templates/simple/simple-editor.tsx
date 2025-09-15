@@ -199,7 +199,7 @@ export function SimpleEditor({
   content,
   setContent,
   toolbarVariant = "fixed",
-  isEditing,
+  isEditing = true,
 }: SimpleEditorProps) {
   const isMobile = useIsMobile();
   // const { height } = useWindowSize(); // height currently unused
