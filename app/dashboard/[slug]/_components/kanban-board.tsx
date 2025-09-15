@@ -232,7 +232,6 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                             key={task.id}
                             className="mt-2 first:mt-0"
                             onClick={() => {
-                              console.log("ok");
                               handleTaskClick(task);
                             }}
                           >
