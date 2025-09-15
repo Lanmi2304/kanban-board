@@ -99,7 +99,9 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   // Sensors (custom sensor which i found on github issue for propagation prevention)
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 350, tolerance: 5 },
+    }),
   );
 
   function handleDragEnd(event: DragEndEvent) {
@@ -229,13 +231,6 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                           <div
                             key={task.id}
                             className="mt-2 first:mt-0"
-                            onTouchStart={() => {
-                              handleTaskClick(task);
-                            }}
-                            // Idk why but this fixed the problem on the mobile phone..
-                            onTouchEnd={() => {
-                              handleTaskClick(task);
-                            }}
                             onClick={() => {
                               handleTaskClick(task);
                             }}
