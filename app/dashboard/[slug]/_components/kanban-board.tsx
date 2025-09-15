@@ -229,13 +229,13 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                           <div
                             key={task.id}
                             className="mt-2 first:mt-0"
-                            onTouchStart={() => {
-                              handleTaskClick(task);
-                            }}
+                            // onTouchStart={() => {
+                            //   handleTaskClick(task);
+                            // }}
                             // Idk why but this fixed the problem on the mobile phone..
-                            onTouchEnd={() => {
-                              handleTaskClick(task);
-                            }}
+                            // onTouchEnd={() => {
+                            //   handleTaskClick(task);
+                            // }}
                             onClick={() => {
                               handleTaskClick(task);
                             }}

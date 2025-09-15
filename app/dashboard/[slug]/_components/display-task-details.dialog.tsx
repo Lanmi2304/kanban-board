@@ -46,7 +46,11 @@ export function DisplayTaskDetails({
           </DialogDescription>
         </DialogHeader>
         <div className="relative mt-4 h-fit w-full space-y-4">
-          <SimpleEditor content={content} setContent={setContent} />
+          <SimpleEditor
+            isEditing={false}
+            content={content}
+            setContent={setContent}
+          />
         </div>
       </DialogContent>
     </Dialog>

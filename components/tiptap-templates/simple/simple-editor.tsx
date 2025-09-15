@@ -78,8 +78,18 @@ import js from "highlight.js/lib/languages/javascript";
 import ts from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { cn } from "@/lib/utils/cn";
 
 // import content from "@/components/tiptap-templates/simple/data/content.json"; // demo content removed
+
+type SimpleEditorProps = {
+  content?: ContentType;
+  setContent: React.Dispatch<React.SetStateAction<ContentType | undefined>>;
+  fullWidth?: boolean;
+  className?: string;
+  toolbarVariant?: "fixed" | "floating";
+  isEditing?: boolean;
+};
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -189,13 +199,8 @@ export function SimpleEditor({
   content,
   setContent,
   toolbarVariant = "fixed",
-}: {
-  content?: ContentType;
-  setContent: React.Dispatch<React.SetStateAction<ContentType | undefined>>;
-  fullWidth?: boolean;
-  className?: string;
-  toolbarVariant?: "fixed" | "floating";
-}) {
+  isEditing,
+}: SimpleEditorProps) {
   const isMobile = useIsMobile();
   // const { height } = useWindowSize(); // height currently unused
   const [mobileView, setMobileView] = React.useState<
@@ -280,27 +285,32 @@ export function SimpleEditor({
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        <div className="w-full overflow-hidden">
-          <Toolbar ref={toolbarRef} variant={toolbarVariant}>
-            {mobileView === "main" ? (
-              <MainToolbarContent
-                onHighlighterClick={() => setMobileView("highlighter")}
-                onLinkClick={() => setMobileView("link")}
-                isMobile={isMobile}
-              />
-            ) : (
-              <MobileToolbarContent
-                type={mobileView === "highlighter" ? "highlighter" : "link"}
-                onBack={() => setMobileView("main")}
-              />
-            )}
-          </Toolbar>
-        </div>
+        {isEditing && (
+          <div className="w-full overflow-hidden">
+            <Toolbar ref={toolbarRef} variant={toolbarVariant}>
+              {mobileView === "main" ? (
+                <MainToolbarContent
+                  onHighlighterClick={() => setMobileView("highlighter")}
+                  onLinkClick={() => setMobileView("link")}
+                  isMobile={isMobile}
+                />
+              ) : (
+                <MobileToolbarContent
+                  type={mobileView === "highlighter" ? "highlighter" : "link"}
+                  onBack={() => setMobileView("main")}
+                />
+              )}
+            </Toolbar>
+          </div>
+        )}
 
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content prose mx-0 h-full w-full max-w-full rounded-xl rounded-t-none border pt-4"
+          className={cn(
+            "simple-editor-content prose mx-0 h-full w-full max-w-full rounded-xl rounded-t-none border pt-4",
+            !isEditing && "pointer-events-none",
+          )}
         />
       </EditorContext.Provider>
     </div>
