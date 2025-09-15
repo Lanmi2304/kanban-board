@@ -15,7 +15,7 @@ import {
   TouchSensor,
 } from "../../_components/smart-pointer-sensor";
 import { cn } from "@/lib/utils/cn";
-import { Calendar, Ellipsis, Settings } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Projects, SelectCards, Tasks } from "@/server/db/schema";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -154,19 +154,19 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   return (
     <>
       <div className="flex w-full flex-col gap-4">
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">{project.title}</h1>
           <Button className="w-fit cursor-pointer" variant="outline">
             <Settings />
           </Button>
-        </div>
+        </div> */}
 
-        <Button onClick={() => console.log("Add card")} className="w-fit">
+        {/* <Button onClick={() => console.log("Add card")} className="w-fit">
           + Add Card
-        </Button>
+        </Button> */}
 
         <ScrollArea>
-          <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
+          <div className="mt-10 flex h-screen w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
             <DndContext
               sensors={sensors}
               onDragStart={handleDragStart}
@@ -174,56 +174,48 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
               data-no-dnd="true"
             >
               {cards?.map((card) => (
-                <Card key={card.id} className="m-0 overflow-hidden p-0">
+                <div key={card.id} className="m-0 overflow-hidden p-0">
                   <Droppable
                     id={card.id}
                     className={cn(
-                      "flex h-[560px] w-full min-w-80 shrink-0 flex-col overflow-x-hidden rounded-xl p-4 first:ml-0 last:mr-0 md:w-80",
-                      {
-                        "ring-2 ring-offset-2": isDragging,
-                        "ring-blue-500":
-                          isDragging && card.id.includes("ready"),
-                        "ring-amber-500":
-                          isDragging && card.id.includes("in-progress"),
-                        "ring-purple-500":
-                          isDragging && card.id.includes("in-review"),
-                        "ring-green-500":
-                          isDragging && card.id.includes("done"),
-                      },
+                      "bg-background flex h-fit w-full min-w-64 shrink-0 flex-col overflow-x-hidden rounded-xl p-2 first:ml-0 last:mr-0 md:w-64",
+                      // {
+                      //   "ring-2 ring-offset-2": isDragging,
+                      //   "ring-blue-500":
+                      //     isDragging && card.id.includes("ready"),
+                      //   "ring-amber-500":
+                      //     isDragging && card.id.includes("in-progress"),
+                      //   "ring-purple-500":
+                      //     isDragging && card.id.includes("in-review"),
+                      //   "ring-green-500":
+                      //     isDragging && card.id.includes("done"),
+                      // },
                     )}
                   >
-                    <div className="h-1/5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={cn("size-4 rounded-full ring-2", {
-                              "ring-blue-500": card.id.includes("ready"),
-                              "ring-amber-500": card.id.includes("in-progress"),
-                              "ring-purple-500": card.id.includes("in-review"),
-                              "ring-green-500": card.id.includes("done"),
-                            })}
-                          ></div>
-                          <h1 className="font-semibold">{card.title}</h1>
-                        </div>
-                        <Ellipsis className="text-primary" />
-                      </div>
-                      <p className="text-muted-foreground text-sm">
-                        {card.description}
-                      </p>
-                      <AddTaskDialog
-                        cardId={card.id}
-                        projectId={card.projectId}
-                      />
+                    <div className="flex items-center justify-between">
+                      <h3 className="ml-2 text-sm font-semibold">
+                        {card.title}
+                      </h3>
+                      <Button
+                        className="cursor-pointer p-0"
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <Ellipsis className="text-muted-foreground" />
+                      </Button>
                     </div>
+                    {/* <p className="text-muted-foreground text-sm">
+                        {card.description}
+                      </p> */}
 
-                    <ScrollArea className="flex h-4/5 w-full flex-col">
-                      {isLoading &&
+                    <ScrollArea className="flex w-full flex-col">
+                      {/* {isLoading &&
                         Array.from({ length: 5 }).map((el, id) => (
                           <Skeleton
                             key={id}
                             className="mt-2 h-18 w-full first:mt-0"
                           />
-                        ))}
+                        ))} */}
 
                       {localTasks
                         .filter((task: Tasks) => task.cardId === card.id)
@@ -238,28 +230,28 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                             <Draggable
                               id={task.id}
                               className={cn(
-                                "bg-muted/60 relative z-10 w-full cursor-pointer rounded-lg border p-2 focus:cursor-grab",
-                                {
-                                  "border-blue-500": card.id.includes("ready"),
-                                  "border-amber-500":
-                                    card.id.includes("in-progress"),
-                                  "border-purple-500":
-                                    card.id.includes("in-review"),
-                                  "border-green-500": card.id.includes("done"),
-                                },
+                                "bg-muted h-fit w-full cursor-pointer rounded-lg px-2 py-0.5 pr-0 first:mt-2 focus:cursor-grab",
+                                // {
+                                //   "border-blue-500": card.id.includes("ready"),
+                                //   "border-amber-500":
+                                //     card.id.includes("in-progress"),
+                                //   "border-purple-500":
+                                //     card.id.includes("in-review"),
+                                //   "border-green-500": card.id.includes("done"),
+                                // },
                                 activeTask?.id === task.id && isDragging
                                   ? "opacity-0"
                                   : "opacity-100",
                               )}
                             >
                               <div className="flex items-center justify-between">
-                                <p className="text-foreground/70 line-clamp-3 text-sm font-semibold">
-                                  DEFAULT DESCRIPTION
+                                <p className="text-foreground/80 line-clamp-3 text-xs font-semibold">
+                                  {task.title}
                                 </p>
                                 <SettingsDropdown taskId={task.id} />
                               </div>
 
-                              <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
+                              {/* <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">
                                 <div>
                                   <span className="inline-block w-40 truncate">
                                     {task.title}{" "}
@@ -274,14 +266,18 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                                   <Calendar className="size-4" />{" "}
                                   {task.dueDate.toLocaleDateString()}
                                 </span>
-                              </div>
+                              </div> */}
                             </Draggable>
                           </div>
                         ))}
                       <ScrollBar orientation="vertical" />
                     </ScrollArea>
+                    <AddTaskDialog
+                      cardId={card.id}
+                      projectId={card.projectId}
+                    />
                   </Droppable>
-                </Card>
+                </div>
               ))}
 
               <DragOverlay
@@ -294,16 +290,16 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                   <div
                     className={cn(
                       "bg-muted/90 scale-105 transform rounded-lg border p-3 shadow-lg",
-                      {
-                        "border-blue-500 ring-1 ring-blue-300":
-                          activeTask.cardId.includes("ready"),
-                        "border-amber-500 ring-1 ring-amber-300":
-                          activeTask.cardId.includes("in-progress"),
-                        "border-purple-500 ring-1 ring-purple-300":
-                          activeTask.cardId.includes("in-review"),
-                        "border-green-500 ring-1 ring-green-300":
-                          activeTask.cardId.includes("done"),
-                      },
+                      // {
+                      //   "border-blue-500 ring-1 ring-blue-300":
+                      //     activeTask.cardId.includes("ready"),
+                      //   "border-amber-500 ring-1 ring-amber-300":
+                      //     activeTask.cardId.includes("in-progress"),
+                      //   "border-purple-500 ring-1 ring-purple-300":
+                      //     activeTask.cardId.includes("in-review"),
+                      //   "border-green-500 ring-1 ring-green-300":
+                      //     activeTask.cardId.includes("done"),
+                      // },
                     )}
                     style={{
                       // Add transition for smooth color changes
@@ -311,14 +307,22 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                         "border-color 0.15s ease, box-shadow 0.15s ease",
                     }}
                   >
-                    <p className="text-foreground/80 text-sm">
+                    {/* <p className="text-foreground/80 text-sm">
                       DEFAULT DESCRIPTION ACTIVE TASK
-                    </p>
-                    <div className="mt-2 font-semibold">{activeTask.title}</div>
+                    </p> */}
+                    <div className="mt-2 text-xs font-semibold">
+                      {activeTask.title}
+                    </div>
                   </div>
                 ) : null}
               </DragOverlay>
             </DndContext>
+            <Button
+              variant="outline"
+              className="!bg-muted/30 cursor-pointer justify-start border-0 text-xs"
+            >
+              + Add another list
+            </Button>
             <ScrollBar orientation="horizontal" />
           </div>
         </ScrollArea>

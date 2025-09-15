@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, SquarePen } from "lucide-react";
 import { toast } from "sonner";
 import { deleteTaskAction } from "../_actions/delete-task.action";
 import {
@@ -53,7 +53,7 @@ export function SettingsDropdown({ taskId }: { taskId: string }) {
             className="p-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <Ellipsis className="text-primary size-4" />
+            <SquarePen className="text-muted-foreground size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="relative z-50 flex flex-col gap-1">

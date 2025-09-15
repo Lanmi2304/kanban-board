@@ -15,7 +15,7 @@ export default async function Project({
   ]);
 
   return (
-    <div className="mt-20 w-full">
+    <div className="mt-16 h-full w-full bg-gradient-to-br from-violet-600 to-[#a94075] px-2">
       <KanbanBoard cards={cards} project={project} />
     </div>
   );

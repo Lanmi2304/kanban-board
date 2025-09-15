@@ -17,7 +17,7 @@ export default async function Dashboard() {
 
   const projects = await getProjects(userId);
   return (
-    <div className="mt-20 flex h-screen w-full items-start justify-center">
+    <div className="mt-20 flex h-screen w-full items-start justify-center px-2 md:px-4">
       {projects.length > 0 ? (
         <div className="grid w-full gap-4">
           <div className="flex w-full items-center justify-between">

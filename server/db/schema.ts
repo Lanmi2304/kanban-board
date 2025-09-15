@@ -110,7 +110,6 @@ export const tasks = pgTable("tasks", {
 export const cards = pgTable("cards", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
-  description: text("description"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
