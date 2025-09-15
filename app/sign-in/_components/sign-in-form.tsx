@@ -41,7 +41,7 @@ export function SignInForm() {
         { ...values, rememberMe: true, callbackURL: "/dashboard" },
         {
           onError: (error) => {
-            toast.error(error.error.message);
+            toast.error(error.error.message || "Failed to sign in");
           },
         },
       );
