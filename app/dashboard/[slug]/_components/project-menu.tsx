@@ -6,7 +6,7 @@ import { EditableHeading } from "./editable-heading";
 export function ProjectMenu({ project }: { project: Projects }) {
   return (
     <div className="bg-background/70 flex w-full items-center justify-between px-4 py-2 shadow-md backdrop-blur-sm">
-      <EditableHeading title={project.title} />
+      <EditableHeading title={project.title} projectId={project.id} />
       <Button variant="ghost" size="icon" className="cursor-pointer">
         <Settings />
       </Button>

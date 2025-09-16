@@ -309,7 +309,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
             </DndContext>
             <Button
               variant="outline"
-              className="!bg-muted/30 cursor-pointer justify-start border-0 text-xs"
+              className="!bg-muted/30 cursor-pointer justify-start border-0 text-xs text-white"
             >
               + Add another list
             </Button>
