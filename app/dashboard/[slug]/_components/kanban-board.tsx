@@ -29,6 +29,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsDropdown } from "./settings-dropdown";
 import { DisplayTaskDetails } from "./display-task-details.dialog";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { EditableHeading } from "./editable-title";
+import {
+  editCardTitleAction,
+  editProjectTitleAction,
+} from "../_actions/edit-project-title.action";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -183,9 +188,12 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <h3 className="ml-2 text-sm font-semibold">
-                        {card.title}
-                      </h3>
+                      <EditableHeading
+                        title={card.title}
+                        projectId={card.id}
+                        editTitle={editCardTitleAction}
+                        className="ml-2 w-46"
+                      />
                       <Button
                         className="cursor-pointer p-0"
                         variant="ghost"

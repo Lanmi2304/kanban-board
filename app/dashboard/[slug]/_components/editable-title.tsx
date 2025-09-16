@@ -4,16 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
-import { editProjectTitleAction } from "../_actions/edit-project-title.action";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils/cn";
+
+type EditableHeadingProps = {
+  title: string;
+  projectId: string;
+  editTitle: ({
+    newTitle,
+    projectId,
+  }: {
+    newTitle: string;
+    projectId: string;
+  }) => void;
+  className?: string;
+};
 
 export function EditableHeading({
   title,
   projectId,
-}: {
-  title: string;
-  projectId: string;
-}) {
+  editTitle,
+  className,
+}: EditableHeadingProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isPending, startTransition] = useTransition();
@@ -21,7 +33,8 @@ export function EditableHeading({
 
   const mutation = useMutation({
     mutationFn: async (newTitle: string) => {
-      await editProjectTitleAction({ newTitle, projectId });
+      // Reusable action to edit project title (Dynamic passed as a prop)
+      await editTitle({ newTitle, projectId });
     },
     onSuccess: () => {
       setIsEditing(false);
@@ -35,16 +48,17 @@ export function EditableHeading({
   });
 
   const handleTitleChange = () => {
-    if (currentTitle !== title) {
+    if (currentTitle !== title && currentTitle.trim() !== "") {
       startTransition(() => {
         mutation.mutate(currentTitle);
       });
     }
+    setIsEditing(false);
   };
 
   if (isEditing) {
     return (
-      <div className="flex items-center gap-2">
+      <div className={cn("flex items-center gap-2", className)}>
         <Input
           value={currentTitle}
           onBlur={() => handleTitleChange()}
@@ -63,10 +77,7 @@ export function EditableHeading({
     );
   }
   return (
-    <h1
-      className="text-md cursor-pointer font-bold"
-      onClick={() => setIsEditing(true)}
-    >
+    <h1 className="cursor-pointer font-bold" onClick={() => setIsEditing(true)}>
       {displayTitle}
     </h1>
   );
