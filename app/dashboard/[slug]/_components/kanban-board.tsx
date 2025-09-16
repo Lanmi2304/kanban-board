@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsDropdown } from "./settings-dropdown";
 import { DisplayTaskDetails } from "./display-task-details.dialog";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 type KanbanBoardProps = {
   cards?: SelectCards[] | null;
@@ -154,19 +155,8 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
   return (
     <>
       <div className="flex w-full flex-col gap-4">
-        {/* <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{project.title}</h1>
-          <Button className="w-fit cursor-pointer" variant="outline">
-            <Settings />
-          </Button>
-        </div> */}
-
-        {/* <Button onClick={() => console.log("Add card")} className="w-fit">
-          + Add Card
-        </Button> */}
-
         <ScrollArea>
-          <div className="mt-10 flex h-screen w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
+          <div className="mt-8 flex h-screen w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
             <DndContext
               sensors={sensors}
               onDragStart={handleDragStart}

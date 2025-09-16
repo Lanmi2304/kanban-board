@@ -17,6 +17,7 @@ export default async function DashboardLayout({
   const data = await getSession();
   const userId = data?.user.id;
 
+  // TODO: build a proper not-logged-in state
   if (!userId) {
     return (
       <div>

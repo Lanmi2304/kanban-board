@@ -1,4 +1,5 @@
 import { KanbanBoard } from "./_components/kanban-board";
+import { ProjectMenu } from "./_components/project-menu";
 import { getCardsByProjectId } from "./_repositories/get-cards-by-project-id";
 import { getProjectById } from "./_repositories/get-project-by-id";
 
@@ -15,8 +16,11 @@ export default async function Project({
   ]);
 
   return (
-    <div className="mt-16 h-full w-full bg-gradient-to-br from-violet-600 to-[#a94075] px-2">
-      <KanbanBoard cards={cards} project={project} />
+    <div className="mt-16 w-full bg-gradient-to-br from-violet-600 to-[#a94075]">
+      <ProjectMenu project={project} />
+      <div className="px-2">
+        <KanbanBoard cards={cards} project={project} />
+      </div>
     </div>
   );
 }
