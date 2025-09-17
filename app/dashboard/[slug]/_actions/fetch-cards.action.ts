@@ -4,7 +4,6 @@ import { getCardsByProjectId } from "@/app/dashboard/[slug]/_repositories/get-ca
 
 export async function fetchCardsByProjectId(projectId: string) {
   try {
-    // Call the server-side repository function
     const cards = await getCardsByProjectId(projectId);
     return cards;
   } catch (error) {

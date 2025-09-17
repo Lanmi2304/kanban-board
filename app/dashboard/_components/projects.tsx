@@ -10,11 +10,11 @@ export function Projects({ projects }: { projects: Projects[] }) {
 
   console.log(projects);
   return (
-    <div className="grid w-full gap-4">
+    <div className="grid w-full grid-cols-2 gap-2.5 md:grid-cols-4 md:justify-start">
       {projects.filter((project) =>
         project.title.toLowerCase().includes(search),
       ).length === 0 && (
-        <div className="flex size-full items-center justify-center">
+        <div className="flex size-full flex-wrap items-center justify-center">
           No projects found
         </div>
       )}
@@ -24,15 +24,16 @@ export function Projects({ projects }: { projects: Projects[] }) {
           <Link href={`/dashboard/${project.id}`} key={project.id}>
             <Card
               key={project.id}
-              className="hover:bg-accent hover:cursor-pointer"
+              className="hover:bg-accent gap-1.5 overflow-hidden p-0 hover:cursor-pointer"
             >
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">
+              <div className="h-20 w-full bg-gradient-to-br from-violet-600 to-[#a94075]"></div>
+              <CardHeader className="px-2">
+                <CardTitle className="text-md font-semibold">
                   {project.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground line-clamp-3">
+              <CardContent className="relative -top-2 px-2 pt-0">
+                <p className="text-muted-foreground line-clamp-1 text-sm">
                   {project.description}
                 </p>
               </CardContent>
