@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
-export function SettingsDropdown({ taskId }: { taskId: string }) {
+export function TaskSettingsDropdown({ taskId }: { taskId: string }) {
   const [openAlert, setOpenAlert] = useState(false);
   const queryClient = useQueryClient();
 
@@ -64,7 +64,7 @@ export function SettingsDropdown({ taskId }: { taskId: string }) {
               setOpenAlert(true);
               e.stopPropagation();
             }}
-            className="hover:bg-destructive/90! bg-destructive cursor-pointer text-white hover:text-white!"
+            className="!hover:bg-destructive/90 bg-destructive !hover:text-white cursor-pointer text-white"
           >
             Delete
           </DropdownMenuItem>

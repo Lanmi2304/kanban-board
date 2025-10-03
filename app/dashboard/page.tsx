@@ -19,7 +19,7 @@ export default async function Dashboard() {
 
   const projects = await getProjects(userId);
   return (
-    <div className="mx-auto mt-20 flex h-screen w-full max-w-7xl flex-col items-start justify-start px-2 md:px-4">
+    <div className="mx-auto mt-20 flex h-screen w-full max-w-7xl flex-col items-start justify-start px-2 md:px-0">
       <div className="mb-10 flex w-full flex-col gap-2">
         <div className="flex w-full items-center gap-2">
           <LayoutTemplate className="text-muted-foreground" />

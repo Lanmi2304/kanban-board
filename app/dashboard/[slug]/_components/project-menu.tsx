@@ -1,8 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Projects } from "@/server/db/schema";
-import { Settings } from "lucide-react";
 import { EditableHeading } from "./editable-title";
 import { editProjectTitleAction } from "../_actions/edit-project-title.action";
+import { BoardSettingsDropdown } from "./board-settings-dropdown";
 
 export function ProjectMenu({ project }: { project: Projects }) {
   return (
@@ -12,10 +11,8 @@ export function ProjectMenu({ project }: { project: Projects }) {
         projectId={project.id}
         editTitle={editProjectTitleAction}
       />
-      <Button variant="ghost" size="icon" className="cursor-pointer">
-        <Settings />
-      </Button>
       {/* Future actions like edit, delete can go here */}
+      <BoardSettingsDropdown boardId={project.id} />
     </div>
   );
 }

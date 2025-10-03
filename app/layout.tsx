@@ -29,9 +29,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="fixed top-2 right-5 z-30">
+          {/* <div className="fixed top-2 right-5 z-30">
             <ModeToggle />
-          </div>
+          </div> */}
           <QueryClientProviderWrapper>
             <NuqsAdapter>{children}</NuqsAdapter>
           </QueryClientProviderWrapper>

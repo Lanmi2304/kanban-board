@@ -26,7 +26,7 @@ import { fetchTasksByProjectId } from "../_actions/fetch-tasks.action";
 import { toggleTaskStateAction } from "../_actions/toggle-task-state.action";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SettingsDropdown } from "./settings-dropdown";
+import { TaskSettingsDropdown } from "./settings-dropdown";
 import { DisplayTaskDetails } from "./display-task-details.dialog";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { EditableHeading } from "./editable-title";
@@ -246,7 +246,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
                                 <p className="text-foreground/80 line-clamp-3 text-xs font-semibold">
                                   {task.title}
                                 </p>
-                                <SettingsDropdown taskId={task.id} />
+                                <TaskSettingsDropdown taskId={task.id} />
                               </div>
 
                               {/* <div className="text-foreground text-md mt-4 flex items-center justify-between font-semibold">

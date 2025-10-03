@@ -53,7 +53,7 @@ export default async function DashboardLayout({
           <NavUser user={data.user} />
         </div>
       </header>
-      <div className="w-full">{children}</div>
+      {children}
     </>
   );
 }
