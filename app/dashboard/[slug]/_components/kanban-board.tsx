@@ -161,7 +161,7 @@ export function KanbanBoard({ cards, project }: KanbanBoardProps) {
     <>
       <div className="flex w-full flex-col gap-4">
         <ScrollArea>
-          <div className="mt-8 flex h-screen w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
+          <div className="mt-16 flex h-screen w-full flex-col gap-2 md:flex-row md:gap-4 md:space-y-0">
             <DndContext
               sensors={sensors}
               onDragStart={handleDragStart}
