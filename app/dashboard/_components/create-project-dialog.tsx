@@ -84,7 +84,7 @@ export function CreateProjectDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="cursor-pointer">
-          + Create Project
+          + Create Workspace
         </Button>
       </DialogTrigger>
 

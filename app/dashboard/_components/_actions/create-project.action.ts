@@ -13,30 +13,20 @@ export const createNewProjectAction = authActionClient
     const projectId = crypto.randomUUID();
     const DEFAULT_CARDS: InsertCards[] = [
       {
-        id: `${projectId}-ready`,
-        title: "Ready",
-        description: "This is ready to be picked up",
+        id: `${projectId}-to-do`,
+        title: "To Do",
         userId,
         projectId,
       },
       {
-        id: `${projectId}-in-progress`,
-        title: "In Progress",
-        description: "This task is currently being worked on",
-        userId,
-        projectId,
-      },
-      {
-        id: `${projectId}-in-review`,
-        title: "In Review",
-        description: "This task is currently being reviewed",
+        id: `${projectId}-doing`,
+        title: "Doing",
         userId,
         projectId,
       },
       {
         id: `${projectId}-done`,
         title: "Done",
-        description: "This task is completed",
         userId,
         projectId,
       },

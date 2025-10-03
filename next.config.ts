@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "100mb",
     },
   },
+  images: {
+    remotePatterns: [new URL("https://trello-backgrounds.s3.amazonaws.com/**")],
+  },
 };
 
 export default nextConfig;

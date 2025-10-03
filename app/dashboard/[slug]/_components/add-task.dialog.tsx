@@ -105,7 +105,10 @@ export function AddTaskDialog({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mt-2 w-full cursor-pointer">
+        <Button
+          variant="outline"
+          className="mt-2 w-full cursor-pointer justify-start border-0 text-xs"
+        >
           + Add Task
         </Button>
       </DialogTrigger>
